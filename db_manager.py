@@ -16,7 +16,8 @@ class DBManager:
         self.client = MongoClient(port=port)
         self.db = self._get_db()
         self.posts, self.tags, self.votes = self._create_collections()
-        print('DONE')
+        self._populate_collections()
+        print('phase 1 complete')
 
     def _get_db(self):
         """
@@ -50,15 +51,18 @@ class DBManager:
         Populates the Posts, Tags, and Votes collections with the data in Posts.json, Tags.json, and Votes.json
         respectively.
         """
+        print('1')
         with open(POSTS_FILE) as p:
             p_data = json.load(p)
         with open(TAGS_FILE) as t:
             t_data = json.load(t)
         with open(VOTES_FILE) as v:
             v_data = json.load(v)
+        print('2')
         self.posts.insert_many(p_data['posts']['row'])
         self.tags.insert_many(t_data['tags']['row'])
         self.votes.insert_many(v_data['votes']['row'])
+        print('3')
 
     def close(self):
         self.client.close()
