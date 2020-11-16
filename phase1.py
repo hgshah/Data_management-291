@@ -14,6 +14,7 @@ class BuildDocStore:
     Class that connects to the specified MongoDB server, creates a database named "291db" (if it does not exist), and 
     then creates three collections named Posts, Tags, and Votes.
     """
+
     def __init__(self, port):
         self.client = MongoClient(port=port)
         self.db = self._get_db()
@@ -69,9 +70,9 @@ class BuildDocStore:
 
 if __name__ == '__main__':
     assert (len(sys.argv) == 2), 'please enter the correct number of arguments - this program should be run using ' \
-                                 '"python3 prj.py PORT_NUMBER"'
+                                 '"python3 phase1.py PORT_NUMBER"'
     try:
-        port = int(sys.argv[1])
-        BuildDocStore(port)
+        p = int(sys.argv[1])
+        BuildDocStore(p)
     except ValueError:
         assert False, 'ValueError - please ensure that the port number specified is an integer'

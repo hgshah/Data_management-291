@@ -13,4 +13,4 @@ Note before running the program ensure that you have the following files in the 
 
     - mkdir ~/mongodb_data_folder
     - mongod --port 27012 --dbpath ~/mongodb_data_folder &
-    - python3 prj.py 27012
+    - python3 phase1.py 27012
