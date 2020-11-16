@@ -1,6 +1,6 @@
 import sys
-from db_manager import DBManager
 from screens import *
+from db_manager import DBManager
 
 DB_NAME = '291db'
 

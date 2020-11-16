@@ -1,5 +1,4 @@
 import os
-from db_manager import DBManager
 
 
 def clear_screen():
