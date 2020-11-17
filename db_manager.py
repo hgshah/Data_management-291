@@ -14,7 +14,7 @@ class DBManager:
         :param port:
         """
         self.client = MongoClient(port=port)
-        self.db = self.client['DB_NAME']
+        self.db = self.client[DB_NAME]
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
 
     def get_num_owned_posts_and_avg_score(self, user_id, post_type):
@@ -25,8 +25,8 @@ class DBManager:
         :return:
         """
         owned_questions_pipeline = [
-            {"$match": {"$and": [{"PostTypeId": str(post_type)}, {"OwnerUserId": str(user_id)}]}},
-            {"$count": "owned_questions"}
+            {'$match': {'$and': [{'PostTypeId': str(post_type)}, {'OwnerUserId': str(user_id)}]}},
+            {'$count': 'owned_questions'}
         ]
         res1 = self.posts.aggregate(owned_questions_pipeline)
         print(list(res1))
