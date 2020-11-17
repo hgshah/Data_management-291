@@ -17,6 +17,8 @@ class Operator:
         start = StartScreen(self.db_manager)
         user_id, report_info = start.run()
         main_menu = MainMenu(self.db_manager, user_id, report_info)
+        main_menu.run()
+        self.db_manager.close()
 
 
 if __name__ == '__main__':
@@ -24,8 +26,7 @@ if __name__ == '__main__':
                                  '"python3 phase2.py PORT_NUMBER"'
     try:
         port = int(sys.argv[1])
-        d = DBManager(port)
-        o = Operator(d)
-        d.close()
+        db_manager = DBManager(port)
+        Operator(db_manager).run()
     except ValueError:
         assert False, 'ValueError - please ensure that the port number specified is an integer'
