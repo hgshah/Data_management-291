@@ -25,17 +25,17 @@ class DBManager:
         :return:
         """
         owned_questions_pipeline = [
-            {'$match': {'$and': [{'PostTypeId': str(post_type)}, {'OwnerUserId': str(user_id)}]}},
-            {'$count': 'owned_questions'}
+            {"$match": {"$and": [{"PostTypeId": str(post_type)}, {"OwnerUserId": str(user_id)}]}},
+            {"$count": "owned_questions"}
         ]
         res1 = self.posts.aggregate(owned_questions_pipeline)
-        print(res1.next())
+        print(list(res1))
         avg_score_pipeline = [
             {'$match': {'$and': [{'PostTypeId': str(post_type)}, {'OwnerUserId': str(user_id)}]}},
             {'$group': {'_id': {'user_id': '$OwnerUserId'}, 'avg_score': {'$avg': '$Score'}}}
         ]
         res2 = self.posts.aggregate(avg_score_pipeline)
-        print(res2.next())
+        print(list(res2))
         return None, None
 
     def get_num_votes(self, user_id):
@@ -49,8 +49,7 @@ class DBManager:
             {'$group': {'_id': {'user_id': '$OwnerUserId'}, 'num_votes': {'$sum': '$Score'}}}
         ]
         res = self.posts.aggregate(num_votes_pipeline)
-        for i in res:
-            print(i)
+        print(list(res))
         exit(0)
 
     def add_post(self, title, body, tags, post_type, user_id, content_license='CC BY-SA 2.5'):
