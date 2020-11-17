@@ -107,8 +107,8 @@ class StartScreen(BaseScreen):
                     invalid = False
                 except ValueError:
                     invalid = True
-            num_owned_qs, avg_q_score = self.db_manager.get_num_owned_questions_and_avg_score(user_id)
-            num_owned_as, avg_a_score = self.db_manager.get_num_owned_answers_and_avg_score(user_id)
+            num_owned_qs, avg_q_score = self.db_manager.get_num_owned_posts_and_avg_score(user_id, 1)
+            num_owned_as, avg_a_score = self.db_manager.get_num_owned_posts_and_avg_score(user_id, 2)
             num_votes = self.db_manager.get_num_votes(user_id)
             return user_id, [num_owned_qs, avg_q_score, num_owned_as, avg_a_score, num_votes]
         elif selection == '2':
