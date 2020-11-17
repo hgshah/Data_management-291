@@ -24,19 +24,19 @@ class DBManager:
         :param post_type: int corresponding to the post type (1 if post type is question and 2 if post type is answer)
         :return:
         """
-        owned_questions_pipeline = [
+        owned_posts_pipeline = [
             {'$match': {'$and': [{'PostTypeId': str(post_type)}, {'OwnerUserId': str(user_id)}]}},
-            {'$count': 'owned_questions'}
+            {'$count': 'num_posts'}
         ]
-        res1 = self.posts.aggregate(owned_questions_pipeline)
-        print(list(res1))
+        res1 = list(self.posts.aggregate(owned_posts_pipeline))
+        num_post_type = 0 if len(res1) != 1 else res1[0]['num_posts']
         avg_score_pipeline = [
             {'$match': {'$and': [{'PostTypeId': str(post_type)}, {'OwnerUserId': str(user_id)}]}},
             {'$group': {'_id': {'user_id': '$OwnerUserId'}, 'avg_score': {'$avg': '$Score'}}}
         ]
-        res2 = self.posts.aggregate(avg_score_pipeline)
-        print(list(res2))
-        return None, None
+        res2 = list(self.posts.aggregate(avg_score_pipeline))
+        post_type_avg_score = 0 if len(res2) != 1 else res2[0]['avg_score']
+        return num_post_type, post_type_avg_score
 
     def get_num_votes(self, user_id):
         """
@@ -48,9 +48,8 @@ class DBManager:
             {'$match': {'OwnerUserId': str(user_id)}},
             {'$group': {'_id': {'user_id': '$OwnerUserId'}, 'num_votes': {'$sum': '$Score'}}}
         ]
-        res = self.posts.aggregate(num_votes_pipeline)
-        print(list(res))
-        exit(0)
+        res = list(self.posts.aggregate(num_votes_pipeline))
+        return 0 if len(res) != 1 else res[0]['num_votes']
 
     def add_post(self, title, body, tags, post_type, user_id, content_license='CC BY-SA 2.5'):
         # TODO create unique id
