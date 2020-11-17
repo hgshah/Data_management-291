@@ -58,12 +58,9 @@ class BuildDocStore:
             t_data = json.load(t)
         with open(VOTES_FILE) as v:
             v_data = json.load(v)
-        p = self.posts.insert_many(p_data['posts']['row'])
-        print(len(p.inserted_ids))
-        t = self.tags.insert_many(t_data['tags']['row'])
-        print(len(t.inserted_ids))
-        v = self.votes.insert_many(v_data['votes']['row'])
-        print(len(v.inserted_ids))
+        p_res = self.posts.insert_many(p_data['posts']['row'])
+        t_res = self.tags.insert_many(t_data['tags']['row'])
+        v_res = self.votes.insert_many(v_data['votes']['row'])
 
     def _close(self):
         self.client.close()
