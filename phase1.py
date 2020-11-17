@@ -18,21 +18,10 @@ class BuildDocStore:
     def __init__(self, port):
         self.client = MongoClient(port=port)
         self.db = self.client[DB_NAME]
-        # self.db = self._get_db()
         self._drop_collections()
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
         self._populate_collections()
         self._close()
-
-    # def _get_db(self):
-    #     """
-    #     Gets a pymongo database with name DB_NAME.
-    #     :return: a pymongo.database.Database object with the name DB_NAME
-    #     """
-    #     if DB_NAME not in self.client.list_database_names():
-    #         return self.client.get_database(name=DB_NAME)
-    #     else:
-    #         return self.client[DB_NAME]
 
     def _drop_collections(self):
         """
