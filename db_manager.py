@@ -36,6 +36,7 @@ class DBManager:
         ]
         res2 = self.posts.aggregate(avg_score_pipeline)
         print(res2)
+        return None, None
 
     def get_num_votes(self, user_id):
         """

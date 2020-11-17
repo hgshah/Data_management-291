@@ -79,7 +79,8 @@ class StartScreen(BaseScreen):
         BaseScreen.__init__(self, db_manager=db_manager)
 
     def _setup(self):
-        print('Would you like to provide a user id?\n'
+        print('START SCREEN')
+        print('\nWould you like to provide a user id?\n'
               '\t[1] Yes\n'
               '\t[2] No')
 
@@ -97,7 +98,7 @@ class StartScreen(BaseScreen):
         selection = select_from_menu(valid_inputs)
         if selection == '1':
             try:
-                user_id = int(input('Please enter the user id that you would like to use:\n> '))
+                user_id = int(input('\nPlease enter the user id that you would like to use:\n> '))
                 invalid = False
             except ValueError:
                 invalid = True
