@@ -29,15 +29,13 @@ class DBManager:
             {'$count': 'owned_questions'}
         ]
         res1 = self.posts.aggregate(owned_questions_pipeline)
-        for i in res1:
-            print(i)
+        print(res1.next())
         avg_score_pipeline = [
             {'$match': {'$and': [{'PostTypeId': str(post_type)}, {'OwnerUserId': str(user_id)}]}},
             {'$group': {'_id': {'user_id': '$OwnerUserId'}, 'avg_score': {'$avg': '$Score'}}}
         ]
         res2 = self.posts.aggregate(avg_score_pipeline)
-        for i in res2:
-            print(i)
+        print(res2.next())
         return None, None
 
     def get_num_votes(self, user_id):
