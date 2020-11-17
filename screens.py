@@ -145,9 +145,9 @@ class MainMenu(BaseScreen):
         if len(self.report_info) == 5:
             print(
                 '\nNumber of owned questions: {}\n'
-                'Average score of owned questions: {}\n'
+                'Average score for owned questions: {}\n'
                 'Number of owned answers: {}\n'
-                'Average score of owned answers: {}\n'
+                'Average score for owned answers: {}\n'
                 'Number of votes registered for you: {}'.format(
                     self.report_info[0],
                     self.report_info[1],
@@ -207,14 +207,14 @@ class PostQuestion(BaseScreen):
         tags = []
         title = input('\nPlease enter the title of the question you would like to post:\n> ')
         body = input('\nPlease enter the body of the question you would like to post:\n> ')
-        print('Would you like to add tag(s)?\n'
+        print('\nWould you like to add tag(s)?\n'
               '\t[1] Yes\n'
               '\t[2] No')
         selection = select_from_menu(valid_inputs)
         while selection == '1':
             tag = input('Enter the tag you would like to add:\n> ')
             tags.append(tag)
-            print('Would you like to add another tag?\n'
+            print('\nWould you like to add another tag?\n'
                   '\t[1] Yes\n'
                   '\t[2] No')
             selection = select_from_menu(valid_inputs)
