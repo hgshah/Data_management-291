@@ -19,26 +19,24 @@ class BuildDocStore:
         self.client = MongoClient(port=port)
         self.db = self.client[DB_NAME]
         # self.db = self._get_db()
-        self.posts, self.tags, self.votes = self._create_collections()
+        self._drop_collections()
+        self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
         self._populate_collections()
         self._close()
 
-    def _get_db(self):
-        """
-        Gets a pymongo database with name DB_NAME.
-        :return: a pymongo.database.Database object with the name DB_NAME
-        """
-        if DB_NAME not in self.client.list_database_names():
-            return self.client.get_database(name=DB_NAME)
-        else:
-            return self.client[DB_NAME]
+    # def _get_db(self):
+    #     """
+    #     Gets a pymongo database with name DB_NAME.
+    #     :return: a pymongo.database.Database object with the name DB_NAME
+    #     """
+    #     if DB_NAME not in self.client.list_database_names():
+    #         return self.client.get_database(name=DB_NAME)
+    #     else:
+    #         return self.client[DB_NAME]
 
-    def _create_collections(self):
+    def _drop_collections(self):
         """
-        Creates three collections named Posts, Tags, and Votes. If these collections already exist, they will be dropped
-        and new collections will be created.
-        :return: a tuple of three pymongo.collection.Collection objects corresponding to Posts, Tags, and Votes
-                 collections respectively
+        Drops the three collections named Posts, Tags, and Votes if they already exist.
         """
         assert path.exists(POSTS_FILE), 'no "Posts.json" file exists in the current directory'
         assert path.exists(TAGS_FILE), 'no "Tags.json" file exists in the current directory'
@@ -48,8 +46,6 @@ class BuildDocStore:
         for name in coll_names:
             if name in coll_list:
                 self.db.drop_collection(name)
-        # return [self.db.create_collection(name) for name in coll_names]
-        return [self.db[name] for name in coll_names]
 
     def _populate_collections(self):
         """
@@ -62,12 +58,12 @@ class BuildDocStore:
             t_data = json.load(t)
         with open(VOTES_FILE) as v:
             v_data = json.load(v)
-        print(type(p_data['posts']['row']))
-        print(type(t_data['tags']['row']))
-        print(type(v_data['votes']['row']))
-        self.posts.insert_many(p_data['posts']['row'])
-        self.tags.insert_many(t_data['tags']['row'])
-        self.votes.insert_many(v_data['votes']['row'])
+        p = self.posts.insert_many(p_data['posts']['row'])
+        print(p.inserted_ids)
+        t = self.tags.insert_many(t_data['tags']['row'])
+        print(t.inserted_ids)
+        v = self.votes.insert_many(v_data['votes']['row'])
+        print(v.inserted_ids)
 
     def _close(self):
         self.client.close()
