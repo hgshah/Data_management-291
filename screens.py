@@ -144,11 +144,11 @@ class MainMenu(BaseScreen):
         print('MAIN MENU\n\nWelcome {}!'.format('anonymous' if self.user_id is None else self.user_id))
         if len(self.report_info) == 5:
             print(
-                '\tNumber of owned questions: {}\n'
-                '\tAverage score of owned questions: {}\n'
-                '\tNumber of owned answers: {}\n'
-                '\tAverage score of owned answers: {}\n'
-                '\tNumber of votes registered for you: {}'.format(
+                '\nNumber of owned questions: {}\n'
+                'Average score of owned questions: {}\n'
+                'Number of owned answers: {}\n'
+                'Average score of owned answers: {}\n'
+                'Number of votes registered for you: {}'.format(
                     self.report_info[0],
                     self.report_info[1],
                     self.report_info[2],
@@ -170,7 +170,7 @@ class MainMenu(BaseScreen):
         Gives the user the option to either post a question or search for questions and carries out the corresponding
         action. Repeats until the user decides to end the program.
         """
-        valid_inputs = ['1', '2', '3']
+        valid_inputs = ['1', '2', 'e']
         while True:
             selection = select_from_menu(valid_inputs)
             if selection == '1':
