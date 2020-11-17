@@ -17,7 +17,8 @@ class BuildDocStore:
 
     def __init__(self, port):
         self.client = MongoClient(port=port)
-        self.db = self._get_db()
+        self.db = self.client[DB_NAME]
+        # self.db = self._get_db()
         self.posts, self.tags, self.votes = self._create_collections()
         self._populate_collections()
         self._close()
@@ -47,7 +48,8 @@ class BuildDocStore:
         for name in coll_names:
             if name in coll_list:
                 self.db.drop_collection(name)
-        return [self.db.create_collection(name) for name in coll_names]
+        # return [self.db.create_collection(name) for name in coll_names]
+        return [self.db[name] for name in coll_names]
 
     def _populate_collections(self):
         """
@@ -60,6 +62,9 @@ class BuildDocStore:
             t_data = json.load(t)
         with open(VOTES_FILE) as v:
             v_data = json.load(v)
+        print(type(p_data['posts']['row']))
+        print(type(p_data['tags']['row']))
+        print(type(p_data['votes']['row']))
         self.posts.insert_many(p_data['posts']['row'])
         self.tags.insert_many(t_data['tags']['row'])
         self.votes.insert_many(v_data['votes']['row'])
