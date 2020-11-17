@@ -63,8 +63,8 @@ class BuildDocStore:
         with open(VOTES_FILE) as v:
             v_data = json.load(v)
         print(type(p_data['posts']['row']))
-        print(type(p_data['tags']['row']))
-        print(type(p_data['votes']['row']))
+        print(type(t_data['tags']['row']))
+        print(type(v_data['votes']['row']))
         self.posts.insert_many(p_data['posts']['row'])
         self.tags.insert_many(t_data['tags']['row'])
         self.votes.insert_many(v_data['votes']['row'])
