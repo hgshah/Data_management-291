@@ -26,7 +26,7 @@ if __name__ == '__main__':
                                  '"python3 phase2.py PORT_NUMBER"'
     try:
         port = int(sys.argv[1])
-        db_manager = DBManager(port)
-        Operator(db_manager).run()
+        dbm = DBManager(port)
+        Operator(dbm).run()
     except ValueError:
         assert False, 'ValueError - please ensure that the port number specified is an integer'
