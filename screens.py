@@ -17,12 +17,12 @@ def select_from_menu(valid_inputs):
     :param valid_inputs: list including all the inputs that should be considered valid
     :return: a string corresponding to the users valid selection
     """
-    selection = input('> ').lower()
-    while selection not in valid_inputs:
+    selection = input('> ')
+    while selection.lower() not in valid_inputs:
         print('"{}" is an invalid selection, please enter a valid selection from the menu above.'
               .format(selection))
-        selection = input('> ').lower()
-    return selection
+        selection = input('> ')
+    return selection.lower()
 
 
 class BaseScreen:
