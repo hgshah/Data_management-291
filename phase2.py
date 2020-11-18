@@ -19,6 +19,7 @@ class Operator:
         main_menu = MainMenu(self.db_manager, user_id, report_info)
         main_menu.run()
         self.db_manager.close()
+        clear_screen()
 
 
 if __name__ == '__main__':
