@@ -49,10 +49,8 @@ class DBManager:
         res1 = list(self.posts.find(query, projection=proj))
         if len(res1) == 0:
             return 0
-        post_ids = [post_id['Id'] for post_id in res1]
-        print(res1, post_ids)
         num_votes_pipeline = [
-            {'$match': {'PostId': {'$in', res1}}},
+            {'$match': {'PostId': {'$in', [post_id['Id'] for post_id in res1]}}},
             {'$count': 'num_votes'}
         ]
         res2 = list(self.votes.aggregate(num_votes_pipeline))
