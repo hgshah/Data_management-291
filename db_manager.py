@@ -49,11 +49,13 @@ class DBManager:
         res1 = list(self.posts.find(query, proj=proj))
         if len(res1) == 0:
             return 0
+        print(res1)
         num_votes_pipeline = [
             {'$match': {'PostId': {'$in', res1}}},
             {'$count': 'num_votes'}
         ]
         res2 = list(self.votes.aggregate(num_votes_pipeline))
+        print(res2)
         return 0 if len(res2) != 1 else res2[0]['num_votes']
 
     def add_post(self, title, body, tags, post_type, user_id, content_license='CC BY-SA 2.5'):
