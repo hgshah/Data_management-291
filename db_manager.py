@@ -45,7 +45,7 @@ class DBManager:
         :return:
         """
         query = {'OwnerUserId': str(user_id)}
-        proj = ['Id']
+        proj = {'Id': True, '_id': False}
         res1 = list(self.posts.find(query, projection=proj))
         if len(res1) == 0:
             return 0
