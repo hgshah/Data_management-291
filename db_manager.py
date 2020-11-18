@@ -50,7 +50,7 @@ class DBManager:
         if len(res1) == 0:
             return 0
         num_votes_pipeline = [
-            {'$match': {'PostId': {'$in', [post_id['Id'] for post_id in res1]}}},
+            {'$match': {'PostId': {'$in': [post_id['Id'] for post_id in res1]}}},
             {'$count': 'num_votes'}
         ]
         res2 = list(self.votes.aggregate(num_votes_pipeline))
