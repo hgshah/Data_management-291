@@ -46,7 +46,7 @@ class DBManager:
         """
         query = {'OwnerUserId': str(user_id)}
         proj = ['Id']
-        res1 = list(self.posts.find(query, proj=proj))
+        res1 = list(self.posts.find(query, projection=proj))
         if len(res1) == 0:
             return 0
         print(res1)
