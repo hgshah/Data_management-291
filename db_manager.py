@@ -44,12 +44,17 @@ class DBManager:
         :param user_id:
         :return:
         """
+        query = {'OwnerUserId': str(user_id)}
+        proj = ['Id']
+        res1 = list(self.posts.find(query, proj=proj))
+        if len(res1) == 0:
+            return 0
         num_votes_pipeline = [
-            {'$match': {'OwnerUserId': str(user_id)}},
-            {'$group': {'_id': {'user_id': '$OwnerUserId'}, 'num_votes': {'$sum': '$Score'}}}
+            {'$match': {'PostId': {'$in', res1}}},
+            {'$count': 'num_votes'}
         ]
-        res = list(self.posts.aggregate(num_votes_pipeline))
-        return 0 if len(res) != 1 else res[0]['num_votes']
+        res2 = list(self.votes.aggregate(num_votes_pipeline))
+        return 0 if len(res2) != 1 else res2[0]['num_votes']
 
     def add_post(self, title, body, tags, post_type, user_id, content_license='CC BY-SA 2.5'):
         # TODO create unique id
