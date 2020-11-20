@@ -21,7 +21,6 @@ class BuildDocStore:
         self._drop_collections()
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
         self._populate_collections()
-        self._create_search_index()
         self._close()
 
     def _drop_collections(self):
