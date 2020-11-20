@@ -25,6 +25,7 @@ class DBManager:
         Creates a search index with the Title, Body, and Tags fields in the Posts collection.
         """
         if SEARCH_INDEX not in list(self.posts.list_indexes()):
+            print('Creating search index...')
             keys = [('Title', TEXT), ('Body', TEXT), ('Tags', TEXT)]
             self.posts.create_index(keys, name=SEARCH_INDEX)
 
@@ -77,10 +78,9 @@ class DBManager:
     def get_search_results(self, keywords):
         query = {'$and': [
             {'PostTypeId': 1},
-            {'text': {'search': keywords}}
+            {'text': {'search': keywords, 'caseSensitive': False}}
         ]}
-        print(keywords)
-        return list(self.posts.find(query, hint=[(SEARCH_INDEX, TEXT)]))
+        return list(self.posts.find(query))
 
     def increment_view_count(self, question_id):
         pass
