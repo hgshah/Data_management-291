@@ -265,11 +265,13 @@ class SearchResults(BaseScreen):
         """
         self.res_indices = []
         self.user_id = user_id
-        self.search_res = self.db_manager.get_search_results(keywords)
         BaseScreen.__init__(self, db_manager=db_manager)
+        self.search_res = self.db_manager.get_search_results(keywords)
 
     def _setup(self):
         print('SEARCH RESULTS')
+
+    def _display_search_results(self):
         for i in range(len(self.search_res)):
             self.res_indices.append(i + 1)
             q = self.search_res[i]
