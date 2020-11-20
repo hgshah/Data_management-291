@@ -1,6 +1,7 @@
 from pymongo import MongoClient, TEXT, collation
 
 DB_NAME = '291db'
+SEARCH_INDEX = 'search_index'
 
 
 class DBManager:
@@ -17,6 +18,15 @@ class DBManager:
         self.client = MongoClient(port=port)
         self.db = self.client[DB_NAME]
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
+        self._create_search_index()
+
+    def _create_search_index(self):
+        """
+        Creates a search index with the Title, Body, and Tags fields in the Posts collection.
+        """
+        if SEARCH_INDEX not in list(self.posts.list_indexes()):
+            keys = [('Title', TEXT), ('Body', TEXT), ('Tags', TEXT)]
+            self.posts.create_index(keys, name=SEARCH_INDEX)
 
     def get_num_owned_posts_and_avg_score(self, user_id, post_type):
         """
@@ -65,15 +75,12 @@ class DBManager:
         pass
 
     def get_search_results(self, keywords):
-        # for i in range(len(keywords)):
-            # if '-' in keywords[i]:
-                # keywords[i].replace('-', ' ')
         query = {'$and': [
             {'PostTypeId': 1},
             {'text': {'search': keywords}}
         ]}
         print(keywords)
-        return list(self.posts.find(query))
+        return list(self.posts.find(query, hint=[(SEARCH_INDEX, TEXT)]))
 
     def increment_view_count(self, question_id):
         pass
