@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, TEXT, collation
 
 DB_NAME = '291db'
 
@@ -64,7 +64,13 @@ class DBManager:
         pass
 
     def get_search_results(self, keywords):
-        pass
+        keys = [('Title', TEXT), ('Body', TEXT), ('Tags', TEXT)]
+        self.posts.create_index(keys, name='search_index')
+        query = {'$and': [
+            {'PostTypeId': 1},
+            {'text': {'search': keywords, 'caseSensitive': False}}
+        ]}
+        return list(self.posts.find(query))
 
     def increment_view_count(self, question_id):
         pass
