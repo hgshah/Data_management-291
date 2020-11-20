@@ -1,7 +1,7 @@
 import json
 import sys
 from os import path
-from pymongo import MongoClient
+from pymongo import MongoClient, TEXT, collation
 
 DB_NAME = '291db'
 POSTS_FILE = 'Posts.json'
@@ -21,6 +21,7 @@ class BuildDocStore:
         self._drop_collections()
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
         self._populate_collections()
+        self._create_search_index()
         self._close()
 
     def _drop_collections(self):
@@ -50,6 +51,13 @@ class BuildDocStore:
         p_res = self.posts.insert_many(p_data['posts']['row'])
         t_res = self.tags.insert_many(t_data['tags']['row'])
         v_res = self.votes.insert_many(v_data['votes']['row'])
+
+    def _create_search_index(self):
+        """
+        Creates a search index with the Title, Body, and Tags fields in the Posts collection.
+        """
+        keys = [('Title', TEXT), ('Body', TEXT), ('Tags', TEXT)]
+        self.posts.create_index(keys, name='search_index')
 
     def _close(self):
         self.client.close()

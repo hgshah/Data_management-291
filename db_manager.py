@@ -10,7 +10,8 @@ class DBManager:
 
     def __init__(self, port):
         """
-        Gets a pymongo database with name DB_NAME.
+        Gets a pymongo database with name DB_NAME. Also creates an index on the posts collection to be used for
+        searches.
         :param port:
         """
         self.client = MongoClient(port=port)
@@ -64,12 +65,14 @@ class DBManager:
         pass
 
     def get_search_results(self, keywords):
-        keys = [('Title', TEXT), ('Body', TEXT), ('Tags', TEXT)]
-        self.posts.create_index(keys, name='search_index')
+        # for i in range(len(keywords)):
+            # if '-' in keywords[i]:
+                # keywords[i].replace('-', ' ')
         query = {'$and': [
             {'PostTypeId': 1},
-            {'text': {'search': keywords, 'caseSensitive': False}}
+            {'text': {'search': keywords}}
         ]}
+        print(keywords)
         return list(self.posts.find(query))
 
     def increment_view_count(self, question_id):
