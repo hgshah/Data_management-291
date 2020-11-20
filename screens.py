@@ -286,6 +286,7 @@ class SearchResults(BaseScreen):
         """
         TODO
         """
+        self._display_search_results()
         self.res_indices.append('r')
         print('\nPlease select the action that you would like to take:\n'
               '\t[#] Enter the number corresponding to the question that you would like to perform an action on\n'
