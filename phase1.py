@@ -52,13 +52,6 @@ class BuildDocStore:
         t_res = self.tags.insert_many(t_data['tags']['row'])
         v_res = self.votes.insert_many(v_data['votes']['row'])
 
-    def _create_search_index(self):
-        """
-        Creates a search index with the Title, Body, and Tags fields in the Posts collection.
-        """
-        keys = [('Title', TEXT), ('Body', TEXT), ('Tags', TEXT)]
-        self.posts.create_index(keys, name='search_index')
-
     def _close(self):
         self.client.close()
 
