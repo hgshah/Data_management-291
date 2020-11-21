@@ -21,14 +21,14 @@ class DBManager:
         self.db = self.client[DB_NAME]
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
 
-    def _create_search_index(self):
-        """
-        Creates a search index with the Title, Body, and Tags fields in the Posts collection.
-        """
-        if SEARCH_INDEX not in list(self.posts.list_indexes()):
-            print('Creating search index...')
-            keys = [('Title', TEXT), ('Body', TEXT), ('Tags', TEXT)]
-            self.posts.create_index(keys, name=SEARCH_INDEX)
+    # def _create_search_index(self):
+    #     """
+    #     Creates a search index with the Title, Body, and Tags fields in the Posts collection.
+    #     """
+    #     if SEARCH_INDEX not in list(self.posts.list_indexes()):
+    #         print('Creating search index...')
+    #         keys = [('Title', TEXT), ('Body', TEXT), ('Tags', TEXT)]
+    #         self.posts.create_index(keys, name=SEARCH_INDEX)
 
     def get_num_owned_posts_and_avg_score(self, user_id, post_type):
         """
@@ -77,10 +77,11 @@ class DBManager:
         pass
 
     def get_search_results(self, keywords):
-        self._create_search_index()
+        for i in range(len(keywords)):
+            keywords[i] = '/.*' + keywords[i] + '.*/si'
         query = {'$and': [
             {'PostTypeId': QUESTION_TYPE_ID},
-            {'$text': {'$search': keywords}}
+            {'$or': [{'Title': {'$in': keywords}}, {'Tags': {'$in': keywords}}, {'Body': {'$in': keywords}}]}
         ]}
         return list(self.posts.find(query))
 
