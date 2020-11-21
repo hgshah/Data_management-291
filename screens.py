@@ -316,10 +316,13 @@ class SearchResults(BaseScreen):
                 )
                 selection = select_from_menu(self.valid_inputs + ['m', 'r'])
             print(selection)
+            print(self.valid_inputs)
             if selection == 'r':
                 return
             elif selection != 'm':
                 print('here')
+                import time
+                time.sleep(5)
                 QuestionAction(self.db_manager, self.user_id, self.search_res[int(selection) - 1])
 
 
