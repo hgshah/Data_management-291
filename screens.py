@@ -244,9 +244,9 @@ class SearchForQuestions(BaseScreen):
         """
         TODO
         """
-        keywords = input('\nPlease enter a space separated list of one or more keywords:\n> ')
+        keywords = input('\nPlease enter a space separated list of one or more keywords:\n> ').split(' ')
         while len(keywords) == 0:
-            keywords = input('Invalid input - you must enter at least one keyword:\n> ')
+            keywords = input('Invalid input - you must enter at least one keyword:\n> ').split(' ')
         SearchResults(self.db_manager, self.user_id, keywords).run()
 
 
@@ -261,7 +261,7 @@ class SearchResults(BaseScreen):
         Initializes an instance of this class.
         :param db_manager: an instance of the db_manager.DBManager class
         :param user_id: user id specified by the user (if they did not specify one pass a None value)
-        :param keywords: a string containing the space-separated keywords to search
+        :param keywords: a list containing the space-separated keywords to search as elements
         """
         self.res_indices = []
         self.user_id = user_id
@@ -273,7 +273,7 @@ class SearchResults(BaseScreen):
 
     def _display_search_results(self):
         for i in range(len(self.search_res)):
-            self.res_indices.append(i + 1)
+            self.res_indices.append(str(i + 1))
             q = self.search_res[i]
             print(
                 '\n[{}] {}\n'
@@ -287,14 +287,16 @@ class SearchResults(BaseScreen):
         """
         TODO
         """
-        self._display_search_results()
-        self.res_indices.append('r')
-        print('\nPlease select the action that you would like to take:\n'
-              '\t[#] Enter the number corresponding to the question that you would like to perform an action on\n'
-              '\t[r] Return to the main menu')
-        selection = select_from_menu(self.res_indices)
-        if selection != 'r':
-            QuestionAction(self.db_manager, self.user_id, self.search_res[int(selection) - 1])
+        self.res_indices = self.res_indices + ['n', 'r']
+        while True:
+            self._display_search_results()
+            print('\nPlease select the action that you would like to take:\n'
+                  '\t[#] Enter the number corresponding to the question that you would like to perform an action on\n'
+                  '\t[m] See more search results\n'
+                  '\t[r] Return to the main menu')
+            selection = select_from_menu(self.res_indices)
+            if selection != 'r':
+                QuestionAction(self.db_manager, self.user_id, self.search_res[int(selection) - 1])
 
 
 class QuestionAction(BaseScreen):
