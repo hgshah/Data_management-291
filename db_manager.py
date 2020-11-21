@@ -96,8 +96,22 @@ class DBManager:
     def add_answer(self, question_id, body, user_id):
         pass
 
-    def get_answers(self, question_id):
-        pass
+    def get_answers(self, question_data):
+        if 'AcceptedAnswerId' in question_data:
+            accepted_ans_query = {'Id': question_data['AcceptedAnswerId']}
+            accepted_ans = self.posts.find_one(accepted_ans_query)
+            query = {'$and': [
+                {'Id': {'$ne': accepted_ans['Id']}},
+                {'PostTypeId': ANSWER_TYPE_ID},
+                {'ParentId': question_data['Id']}
+            ]}
+            return accepted_ans, list(self.posts.find(query)) #TODO try with q that has no a
+        else:
+            query = {'$and': [
+                {'PostTypeId': ANSWER_TYPE_ID},
+                {'ParentId': question_data['Id']}
+            ]}
+            return None, list(self.posts.find(query))
 
     def check_vote_eligibility(self, post_id, user_id):
         pass
