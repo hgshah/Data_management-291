@@ -1,5 +1,7 @@
 import os
 
+MAX_PER_PAGE = 10
+
 
 def clear_screen():
     """
@@ -271,31 +273,50 @@ class SearchResults(BaseScreen):
     def _setup(self):
         print('SEARCH RESULTS')
 
-    def _display_search_results(self):
-        for i in range(len(self.search_res)):
-            self.res_indices.append(str(i + 1))
-            q = self.search_res[i]
+    def _display_search_results(self, current_ind):
+        clear_screen()
+        self._setup()
+        for i in range(MAX_PER_PAGE):
+            ind = i + current_ind
+            if ind + 1 > len(self.search_res):
+                return None
+            self.res_indices.append(str(ind + 1))
+            q = self.search_res[ind]
             print(
                 '\n[{}] {}\n'
                 '\tCreationDate: {}\tScore: {}\tAnswerCount: {}'.format(
-                    i + 1, q['Title'], q['CreationDate'], q['Score'], q['AnswerCount']
+                    ind + 1, q['Title'], q['CreationDate'], q['Score'], q['AnswerCount']
                 )
             )
-        print(len(self.search_res)) # TODO
+        return MAX_PER_PAGE
 
     def run(self):
         """
         TODO
         """
-        self.res_indices = self.res_indices + ['n', 'r']
+        current_ind = 0
+        self.res_indices = self.res_indices + ['m', 'r']
         while True:
-            self._display_search_results()
-            print('\nPlease select the action that you would like to take:\n'
-                  '\t[#] Enter the number corresponding to the question that you would like to perform an action on\n'
-                  '\t[m] See more search results\n'
-                  '\t[r] Return to the main menu')
+            num_printed = self._display_search_results(current_ind)
+            if (num_printed is None) or (current_ind + num_printed == len(self.search_res)):
+                self.res_indices.remove('m')
+                print(
+                    '\nPlease select the action that you would like to take:\n'
+                    '\t[#] Enter the number corresponding to the question that you would like to perform an action on\n'
+                    '\t[r] Return to the main menu'
+                )
+            else:
+                current_ind += self._display_search_results(current_ind)
+                print(
+                    '\nPlease select the action that you would like to take:\n'
+                    '\t[#] Enter the number corresponding to the question that you would like to perform an action on\n'
+                    '\t[m] See more search results\n'
+                    '\t[r] Return to the main menu'
+                )
             selection = select_from_menu(self.res_indices)
-            if selection != 'r':
+            if selection == 'r':
+                return
+            elif selection != 'm':
                 QuestionAction(self.db_manager, self.user_id, self.search_res[int(selection) - 1])
 
 
