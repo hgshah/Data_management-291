@@ -265,23 +265,24 @@ class SearchResults(BaseScreen):
         :param user_id: user id specified by the user (if they did not specify one pass a None value)
         :param keywords: a list containing the space-separated keywords to search as elements
         """
-        self.res_indices = []
+        self.valid_inputs = []
         self.user_id = user_id
         BaseScreen.__init__(self, db_manager=db_manager)
         self.search_res = self.db_manager.get_search_results(keywords)
-        print(len(self.search_res))
 
     def _setup(self):
         print('SEARCH RESULTS')
 
     def _display_search_results(self, current_ind):
+        self.valid_inputs = []
         clear_screen()
         self._setup()
+        print(len(self.search_res))
         for i in range(MAX_PER_PAGE):
             ind = i + current_ind
             if ind + 1 > len(self.search_res):
                 return None
-            self.res_indices.append(str(ind + 1))
+            self.valid_inputs.append(str(ind + 1))
             q = self.search_res[ind]
             print(
                 '\n[{}] {}\n'
@@ -296,16 +297,15 @@ class SearchResults(BaseScreen):
         TODO
         """
         current_ind = 0
-        self.res_indices = self.res_indices + ['m', 'r']
         while True:
             num_printed = self._display_search_results(current_ind)
             if (num_printed is None) or (current_ind + num_printed == len(self.search_res)):
-                self.res_indices.remove('m')
                 print(
                     '\nPlease select the action that you would like to take:\n'
                     '\t[#] Enter the number corresponding to the question that you would like to perform an action on\n'
                     '\t[r] Return to the main menu'
                 )
+                selection = select_from_menu(self.valid_inputs + ['r'])
             else:
                 current_ind += self._display_search_results(current_ind)
                 print(
@@ -314,10 +314,12 @@ class SearchResults(BaseScreen):
                     '\t[m] See more search results\n'
                     '\t[r] Return to the main menu'
                 )
-            selection = select_from_menu(self.res_indices)
+                selection = select_from_menu(self.valid_inputs + ['m', 'r'])
+            print(selection)
             if selection == 'r':
                 return
             elif selection != 'm':
+                print('here')
                 QuestionAction(self.db_manager, self.user_id, self.search_res[int(selection) - 1])
 
 
