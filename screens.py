@@ -281,6 +281,7 @@ class SearchResults(BaseScreen):
                     i + 1, q['Title'], q['CreationDate'], q['Score'], q['AnswerCount']
                 )
             )
+        print(len(self.search_res)) # TODO
 
     def run(self):
         """

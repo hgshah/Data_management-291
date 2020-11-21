@@ -2,6 +2,8 @@ from pymongo import MongoClient, TEXT, collation
 
 DB_NAME = '291db'
 SEARCH_INDEX = 'search_index'
+QUESTION_TYPE_ID = '1'
+ANSWER_TYPE_ID = '2'
 
 
 class DBManager:
@@ -18,7 +20,6 @@ class DBManager:
         self.client = MongoClient(port=port)
         self.db = self.client[DB_NAME]
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
-        self._create_search_index()
 
     def _create_search_index(self):
         """
@@ -76,8 +77,9 @@ class DBManager:
         pass
 
     def get_search_results(self, keywords):
+        self._create_search_index()
         query = {'$and': [
-            {'PostTypeId': 1},
+            {'PostTypeId': QUESTION_TYPE_ID},
             {'text': {'search': keywords, 'caseSensitive': False}}
         ]}
         return list(self.posts.find(query))
