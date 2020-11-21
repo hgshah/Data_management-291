@@ -315,12 +315,10 @@ class SearchResults(BaseScreen):
                     '\t[r] Return to the main menu'
                 )
                 selection = select_from_menu(self.valid_inputs + ['m', 'r'])
-            print(selection)
-            print(self.valid_inputs)
             if selection != 'm':
                 break
         if selection != 'r':
-            QuestionAction(self.db_manager, self.user_id, self.search_res[int(selection) - 1])
+            QuestionAction(self.db_manager, self.user_id, self.search_res[int(selection) - 1]).run()
 
 
 class QuestionAction(BaseScreen):
