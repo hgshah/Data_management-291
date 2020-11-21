@@ -80,7 +80,7 @@ class DBManager:
         self._create_search_index()
         query = {'$and': [
             {'PostTypeId': QUESTION_TYPE_ID},
-            {'$text': {'search': keywords}}
+            {'$text': {'$search': keywords}}
         ]}
         return list(self.posts.find(query))
 
