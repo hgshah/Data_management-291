@@ -340,7 +340,7 @@ class QuestionAction(BaseScreen):
     def _setup(self):
         self.question_data = self.db_manager.increment_view_count(self.question_data)
         print('QUESTION ACTION\n')
-        for key, value in self.question_data:
+        for key, value in self.question_data.items():
             print('{}: {}'.format(key, value))
         print(
             '\nPlease select the action that you would like to take:\n'
@@ -358,7 +358,7 @@ class QuestionAction(BaseScreen):
     def _answer_question(self):
         clear_screen()
         print('ANSWER QUESTION')
-        body = input('Please enter the text corresponding to your answer:\n> ')
+        body = input('\nPlease enter the text corresponding to your answer:\n> ')
         self.db_manager.add_answer(self.question_data['Id'], body, self.user_id)
         clear_screen()
         print('ANSWER QUESTION')
@@ -369,13 +369,13 @@ class QuestionAction(BaseScreen):
         ans_indices = []
         clear_screen()
         print('EXISTING ANSWERS')
-        accepted_ans, answers = self.db_manager.get_answers(self.question_data['Id'])
+        accepted_ans, answers = self.db_manager.get_answers(self.question_data)
         if accepted_ans is not None:
             ans_indices.append(i)
             print(
                 '\n* [{}] {}\n'
                 '\tCreation Date: {}\tScore: {}'.format(
-                    i + 1,
+                    i,
                     accepted_ans['Body'][:80],
                     accepted_ans['CreationDate'],
                     accepted_ans['Score']
@@ -404,10 +404,10 @@ class QuestionAction(BaseScreen):
                 AnswerAction(
                     self.db_manager,
                     self.user_id,
-                    accepted_ans if accepted_ans is not None else answers[int(selection) - 2]
+                    accepted_ans if selection == '1' else answers[int(selection) - 2]
                 )
             else:
-                AnswerAction(self.db_manager, self.user_id, answers[int(selection) - 2])
+                AnswerAction(self.db_manager, self.user_id, answers[int(selection) - 1])
 
     def run(self):
         valid_inputs = ['1', '2', '3', 'r']
