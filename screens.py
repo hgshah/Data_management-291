@@ -336,7 +336,7 @@ class QuestionAction(BaseScreen):
         self.user_id = user_id
         self.question_data = selected_question_data
         BaseScreen.__init__(self, db_manager=db_manager)
-        self.db_manager.increment_view_count(self.question_data['_id'])
+        self.db_manager.increment_view_count(self.question_data)
 
     def _setup(self):
         print(
