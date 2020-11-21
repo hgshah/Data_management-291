@@ -269,6 +269,7 @@ class SearchResults(BaseScreen):
         self.user_id = user_id
         BaseScreen.__init__(self, db_manager=db_manager)
         self.search_res = self.db_manager.get_search_results(keywords)
+        print(len(self.search_res))
 
     def _setup(self):
         print('SEARCH RESULTS')

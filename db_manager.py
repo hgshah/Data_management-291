@@ -1,4 +1,5 @@
-from pymongo import MongoClient, TEXT, collation
+from pymongo import MongoClient
+import re
 
 DB_NAME = '291db'
 SEARCH_INDEX = 'search_index'
@@ -77,11 +78,17 @@ class DBManager:
         pass
 
     def get_search_results(self, keywords):
-        for i in range(len(keywords)):
-            keywords[i] = '/.*' + keywords[i] + '.*/si'
+        regx_keywords = []
+        for keyword in keywords:
+            regx_keywords.append(re.compile('.*' + keyword + '.*', flags=re.IGNORECASE | re.DOTALL))
+
         query = {'$and': [
             {'PostTypeId': QUESTION_TYPE_ID},
-            {'$or': [{'Title': {'$in': keywords}}, {'Tags': {'$in': keywords}}, {'Body': {'$in': keywords}}]}
+            {'$or': [
+                {'Title': {'$in': regx_keywords}},
+                {'Tags': {'$in': regx_keywords}},
+                {'Body': {'$in': regx_keywords}}
+            ]}
         ]}
         return list(self.posts.find(query))
 
