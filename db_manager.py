@@ -58,13 +58,8 @@ class DBManager:
         :param user_id:
         :return:
         """
-        query = {'OwnerUserId': str(user_id)}
-        proj = {'Id': True, '_id': False}
-        res1 = list(self.posts.find(query, projection=proj))
-        if len(res1) == 0:
-            return 0
         num_votes_pipeline = [
-            {'$match': {'PostId': {'$in': [post_id['Id'] for post_id in res1]}}},
+            {'$match': {'UserId': str(user_id)}},
             {'$count': 'num_votes'}
         ]
         res2 = list(self.votes.aggregate(num_votes_pipeline))
@@ -96,10 +91,7 @@ class DBManager:
         query = {'_id': question_data['_id']}
         update = {'$inc': {'ViewCount': 1}} if 'ViewCount' in question_data else {'$set': {'ViewCount': 1}}
         self.posts.update_one(query, update)
-        current_view_count = self.posts.find_one(query)
-        print(question_data['ViewCount'])
-        print(current_view_count['ViewCount'])
-
+        return self.posts.find_one(query)
 
     def add_answer(self, question_id, body, user_id):
         pass
