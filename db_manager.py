@@ -92,10 +92,14 @@ class DBManager:
         ]}
         return list(self.posts.find(query))
 
-    def increment_view_count(self, question_id):
-        query = {'_id': question_id}
+    def increment_view_count(self, question_data):
+        query = {'_id': question_data['_id']}
+        update = {'$inc': {'ViewCount': 1}} if 'ViewCount' in question_data else {'$set': {'ViewCount': 1}}
+        self.posts.update_one(query, update)
         current_view_count = self.posts.find_one(query)
-        print(current_view_count)
+        print(question_data['ViewCount'])
+        print(current_view_count['ViewCount'])
+
 
     def add_answer(self, question_id, body, user_id):
         pass
