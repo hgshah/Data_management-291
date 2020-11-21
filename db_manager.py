@@ -93,7 +93,9 @@ class DBManager:
         return list(self.posts.find(query))
 
     def increment_view_count(self, question_id):
-        pass
+        query = {'_id': question_id}
+        current_view_count = self.posts.find_one(query)
+        print(current_view_count)
 
     def add_answer(self, question_id, body, user_id):
         pass
