@@ -336,13 +336,13 @@ class QuestionAction(BaseScreen):
         self.user_id = user_id
         self.question_data = selected_question_data
         BaseScreen.__init__(self, db_manager=db_manager)
-        self.db_manager.increment_view_count(self.question_data)
 
     def _setup(self):
+        self.question_data = self.db_manager.increment_view_count(self.question_data)
+        print('QUESTION ACTION\n')
+        for key, value in self.question_data:
+            print('{}: {}'.format(key, value))
         print(
-            'QUESTION ACTION\n'
-            '\n{}\n'
-            '\tCreationDate: {}\tScore: {}\tAnswerCount: {}\n'
             '\nPlease select the action that you would like to take:\n'
             '\t[1] Answer the question\n'
             '\t[2] List existing answers\n'
