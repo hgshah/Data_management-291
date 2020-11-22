@@ -307,7 +307,7 @@ class SearchResults(BaseScreen):
                 )
                 selection = select_from_menu(self.valid_inputs + ['r'])
             else:
-                current_ind += self._display_search_results(current_ind)
+                current_ind += num_printed
                 print(
                     '\nPlease select the action that you would like to take:\n'
                     '\t[#] Enter the number corresponding to the question that you would like to perform an action on\n'
@@ -364,50 +364,54 @@ class QuestionAction(BaseScreen):
         print('ANSWER QUESTION')
         input('Answer successfully posted - please enter any key to return to the main menu:\n> ')
 
-    def _list_answers(self):
-        i = 1
-        ans_indices = []
+    def _display_answers(self, current_ind, answers, has_accepted):
+        valid_inputs = []
         clear_screen()
         print('EXISTING ANSWERS')
-        accepted_ans, answers = self.db_manager.get_answers(self.question_data)
-        if accepted_ans is not None:
-            ans_indices.append(i)
-            print(
-                '\n* [{}] {}\n'
-                '\tCreation Date: {}\tScore: {}'.format(
-                    i,
-                    accepted_ans['Body'][:80],
-                    accepted_ans['CreationDate'],
-                    accepted_ans['Score']
-                )
-            )
-            i += 1
-        for answer in answers:
-            ans_indices.append(i)
-            print(
-                '\n  [{}] {}\n'
-                '\tCreation Date: {}\tScore: {}'.format(
-                    i,
-                    answer['Body'][:80],
-                    answer['CreationDate'],
-                    answer['Score']
-                )
-            )
-            i += 1
-        ans_indices.append('r')
-        print('\nPlease select the action that you would like to take:\n'
-              '\t[#] Enter the number corresponding to the answer that you would like to perform an action on\n'
-              '\t[r] Return to the main menu')
-        selection = select_from_menu(ans_indices)
-        if selection != 'r':
-            if accepted_ans is not None:
-                AnswerAction(
-                    self.db_manager,
-                    self.user_id,
-                    accepted_ans if selection == '1' else answers[int(selection) - 2]
-                )
+        for i in range(MAX_PER_PAGE):
+            ind = i + current_ind
+            if ind + 1 > answers:
+                return None, valid_inputs
+            valid_inputs.append(str(ind + 1))
+            a = answers[ind]
+            if has_accepted and (i == 0):
+                print('\n[{}]**********\n'
+                      '{}\n'
+                      'CreationDate: {}\n'
+                      'Score: {}'.format(ind + 1, a['Body'][:80], a['CreationDate'], a['Score']))
             else:
-                AnswerAction(self.db_manager, self.user_id, answers[int(selection) - 1])
+                print('\n[{}]----------\n'
+                      '{}\n'
+                      'CreationDate: {}\n'
+                      'Scpre: {}'.format(ind + 1, a['Body'][:80], a['CreationDate'], a['Score']))
+        return MAX_PER_PAGE, valid_inputs
+
+    def _list_answers(self):
+        has_accepted, answers = self.db_manager.get_answers(self.question_data)
+        current_ind = 0
+        while True:
+            num_printed, valid_inputs = self._display_answers(current_ind, answers, has_accepted)
+            has_accepted = False
+            if (num_printed is None) or (current_ind + num_printed == len(answers)):
+                print(
+                    '\nPlease select the action that you would like to take:\n'
+                    '\t[#] Enter the number corresponding to the answer that you would like to perform an action on\n'
+                    '\t[r] Return to the main menu'
+                )
+                selection = select_from_menu(valid_inputs + ['r'])
+            else:
+                current_ind += num_printed
+                print(
+                    '\nPlease select the action that you would like to take:\n'
+                    '\t[#] Enter the number corresponding to the answer that you would like to perform an action on\n'
+                    '\t[m] See more answers\n'
+                    '\t[r] Return to the main menu'
+                )
+                selection = select_from_menu(valid_inputs + ['m', 'r'])
+            if selection != 'm':
+                break
+        if selection != 'r':
+            AnswerAction(self.db_manager, self.user_id, answers[int(selection) - 1])
 
     def run(self):
         valid_inputs = ['1', '2', '3', 'r']
@@ -428,7 +432,8 @@ class AnswerAction(BaseScreen):
 
     def _setup(self):
         print('ANSWER ACTION')
-        print(self.answer_data)
+        for key, value in self.answer_data.items():
+            print('{}: {}'.format(key, value))
         print('\nPlease select the action that you would like to take:\n'
               '\t[1] Add a vote\n'
               '\t[r] Return to the main menu')
