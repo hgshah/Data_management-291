@@ -370,7 +370,7 @@ class QuestionAction(BaseScreen):
         print('EXISTING ANSWERS')
         for i in range(MAX_PER_PAGE):
             ind = i + current_ind
-            if ind + 1 > answers:
+            if ind + 1 > len(answers):
                 return None, valid_inputs
             valid_inputs.append(str(ind + 1))
             a = answers[ind]
