@@ -105,16 +105,22 @@ class DBManager:
                 {'PostTypeId': ANSWER_TYPE_ID},
                 {'ParentId': question_data['Id']}
             ]}
-            return accepted_ans, list(self.posts.find(query)) #TODO try with q that has no a
+            return True, [accepted_ans] + list(self.posts.find(query)) #TODO try with q that has no a
         else:
             query = {'$and': [
                 {'PostTypeId': ANSWER_TYPE_ID},
                 {'ParentId': question_data['Id']}
             ]}
-            return None, list(self.posts.find(query))
+            return False, list(self.posts.find(query))
 
     def check_vote_eligibility(self, post_id, user_id):
-        pass
+        query = {'$and': [
+            {'PostId': post_id},
+            {'UserId': str(user_id)}
+        ]}
+        res = self.votes.find_one(query)
+        print(res)
+
 
     def add_vote(self, post_id, user_id):
         # TODO create unique vote id
