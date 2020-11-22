@@ -57,7 +57,7 @@ class BaseScreen:
                 input('\nInvalid action requested...\n'
                       'You have already voted on this post so you are not eligible to vote again - please enter any key'
                       ' to return to the main menu:\n> ')
-            return
+                return
         self.db_manager.add_vote(post_data, user_id)
         input('\nSuccessfully added your vote to the post - please enter any key to return to the main menu:\n> ')
 
@@ -165,6 +165,9 @@ class MainMenu(BaseScreen):
 
     def _refresh(self):
         clear_screen()
+        self.report_info[0], self.report_info[1] = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 1)
+        self.report_info[2], self.report_info[3] = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 2)
+        self.report_info[4] = self.db_manager.get_num_votes(self.user_id)
         self._setup()
 
     def run(self):
@@ -277,7 +280,6 @@ class SearchResults(BaseScreen):
         self.valid_inputs = []
         clear_screen()
         self._setup()
-        print(len(self.search_res))
         for i in range(MAX_PER_PAGE):
             ind = i + current_ind
             if ind + 1 > len(self.search_res):
@@ -341,7 +343,7 @@ class QuestionAction(BaseScreen):
         self.question_data = self.db_manager.increment_view_count(self.question_data)
         print('QUESTION ACTION\n')
         for key, value in self.question_data.items():
-            print('{}: {}'.format(key, value))
+            print('{} : {}'.format(key, value))
         print(
             '\nPlease select the action that you would like to take:\n'
             '\t[1] Answer the question\n'
@@ -375,15 +377,15 @@ class QuestionAction(BaseScreen):
             valid_inputs.append(str(ind + 1))
             a = answers[ind]
             if has_accepted and (i == 0):
-                print('\n[{}]**********\n'
+                print('\n[{}]******************************\n'
                       '{}\n'
                       'CreationDate: {}\n'
                       'Score: {}'.format(ind + 1, a['Body'][:80], a['CreationDate'], a['Score']))
             else:
-                print('\n[{}]----------\n'
+                print('\n[{}]------------------------------\n'
                       '{}\n'
                       'CreationDate: {}\n'
-                      'Scpre: {}'.format(ind + 1, a['Body'][:80], a['CreationDate'], a['Score']))
+                      'Score: {}'.format(ind + 1, a['Body'][:80], a['CreationDate'], a['Score']))
         return MAX_PER_PAGE, valid_inputs
 
     def _list_answers(self):
@@ -411,7 +413,7 @@ class QuestionAction(BaseScreen):
             if selection != 'm':
                 break
         if selection != 'r':
-            AnswerAction(self.db_manager, self.user_id, answers[int(selection) - 1])
+            AnswerAction(self.db_manager, self.user_id, answers[int(selection) - 1]).run()
 
     def run(self):
         valid_inputs = ['1', '2', '3', 'r']
@@ -431,9 +433,9 @@ class AnswerAction(BaseScreen):
         BaseScreen.__init__(self, db_manager=db_manager)
 
     def _setup(self):
-        print('ANSWER ACTION')
+        print('ANSWER ACTION\n')
         for key, value in self.answer_data.items():
-            print('{}: {}'.format(key, value))
+            print('{} : {}'.format(key, value))
         print('\nPlease select the action that you would like to take:\n'
               '\t[1] Add a vote\n'
               '\t[r] Return to the main menu')
