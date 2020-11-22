@@ -48,17 +48,17 @@ class BaseScreen:
         """
         return NotImplementedError
 
-    def _try_adding_vote(self, post_id, user_id):
+    def _try_adding_vote(self, post_data, user_id):
         clear_screen()
         print('ADD VOTE')
         if user_id is not None:
-            eligible = self.db_manager.check_vote_eligibility(post_id, user_id)
+            eligible = self.db_manager.check_vote_eligibility(post_data, user_id)
             if not eligible:
                 input('\nInvalid action requested...\n'
                       'You have already voted on this post so you are not eligible to vote again - please enter any key'
                       ' to return to the main menu:\n> ')
             return
-        self.db_manager.add_vote(post_id, user_id)
+        self.db_manager.add_vote(post_data, user_id)
         input('\nSuccessfully added your vote to the post - please enter any key to return to the main menu:\n> ')
 
     def run(self):
@@ -220,7 +220,7 @@ class PostQuestion(BaseScreen):
                   '\t[1] Yes\n'
                   '\t[2] No')
             selection = select_from_menu(valid_inputs)
-        self.db_manager.add_post()
+        self.db_manager.add_question(title, body, tags, self.user_id)
 
 
 class SearchForQuestions(BaseScreen):
@@ -362,7 +362,7 @@ class QuestionAction(BaseScreen):
         self.db_manager.add_answer(self.question_data['Id'], body, self.user_id)
         clear_screen()
         print('ANSWER QUESTION')
-        input('Answer successfully posted - please enter any key to return to the main menu:\n> ')
+        input('\nAnswer successfully posted - please enter any key to return to the main menu:\n> ')
 
     def _display_answers(self, current_ind, answers, has_accepted):
         valid_inputs = []
@@ -421,7 +421,7 @@ class QuestionAction(BaseScreen):
         elif selection == '2':
             self._list_answers()
         elif selection == '3':
-            self._try_adding_vote(self.question_data['Id'], self.user_id)
+            self._try_adding_vote(self.question_data, self.user_id)
 
 
 class AnswerAction(BaseScreen):
@@ -442,4 +442,4 @@ class AnswerAction(BaseScreen):
         valid_inputs = ['1', 'r']
         selection = select_from_menu(valid_inputs)
         if selection != 'r':
-            self._try_adding_vote(self.answer_data['Id'], self.user_id)
+            self._try_adding_vote(self.answer_data, self.user_id)
