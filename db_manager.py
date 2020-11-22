@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from datetime import datetime
 import re
 
 DB_NAME = '291db'
@@ -22,14 +23,30 @@ class DBManager:
         self.db = self.client[DB_NAME]
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
 
-    # def _create_search_index(self):
-    #     """
-    #     Creates a search index with the Title, Body, and Tags fields in the Posts collection.
-    #     """
-    #     if SEARCH_INDEX not in list(self.posts.list_indexes()):
-    #         print('Creating search index...')
-    #         keys = [('Title', TEXT), ('Body', TEXT), ('Tags', TEXT)]
-    #         self.posts.create_index(keys, name=SEARCH_INDEX)
+    def _get_new_id(self, id_type):
+        res = []
+        max_id_pipeline = {'$group': {'_id': None, 'max_id': {'$max': {'$toInt': '$Id'}}}}
+        if id_type == 'post':
+            res = list(self.posts.aggregate(max_id_pipeline))
+        elif id_type == 'vote':
+            res = list(self.votes.aggregate(max_id_pipeline))
+        elif id_type == 'tag':
+            res = list(self.tags.aggregate(max_id_pipeline))
+        max_id = 0 if len(res) != 1 else res[0]['max_id']
+        return str(max_id + 1)
+
+    def _assemble_tag_string(self, tags):
+        if len(tags) == 0:
+            return None
+        tag_string = ''
+        for tag in tags:
+            tag_string += '<' + tag + '>'
+            res = self.tags.find_one({'TagName': tag})
+            if res is None:
+                write_res = self.tags.insert_one({'Id': self._get_new_id('tag'), 'TagName': tag, 'Count': 1})
+            else:
+                self.tags.update_one({'_id': res['_id']}, {'$inc': {'Count': 1}})
+        return tag_string
 
     def get_num_owned_posts_and_avg_score(self, user_id, post_type):
         """
@@ -65,18 +82,76 @@ class DBManager:
         res2 = list(self.votes.aggregate(num_votes_pipeline))
         return 0 if len(res2) != 1 else res2[0]['num_votes']
 
-    def add_post(self, title, body, tags, post_type, user_id, content_license='CC BY-SA 2.5'):
-        # TODO create unique id
-        # TODO set creation date to current date
-        # post_type should be 1 for a question and 2 for an answer
-        score, view_count, answer_count, cmt_count, fav_count = 0, 0, 0, 0, 0
-        pass
+    def add_question(self, title, body, tags, user_id, content_license='CC BY-SA 2.5'):
+        tag_string = self._assemble_tag_string(tags)
+        if user_id is not None:
+            if tag_string is None:
+                insertion = {
+                    'Id': self._get_new_id('post'),
+                    'PostTypeId': QUESTION_TYPE_ID,
+                    'CreationDate': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.') + datetime.now().strftime('%f')[:3],
+                    'Score': 0,
+                    'ViewCount': 0,
+                    'Body': body,
+                    'OwnerUserId': str(user_id),
+                    'Title': title,
+                    'AnswerCount': 0,
+                    'CommentCount': 0,
+                    'FavoriteCount': 0,
+                    'ContentLicense': content_license
+                }
+            else:
+                insertion = {
+                    'Id': self._get_new_id('post'),
+                    'PostTypeId': QUESTION_TYPE_ID,
+                    'CreationDate': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.') + datetime.now().strftime('%f')[:3],
+                    'Score': 0,
+                    'ViewCount': 0,
+                    'Body': body,
+                    'OwnerUserId': str(user_id),
+                    'Title': title,
+                    'Tags': tag_string,
+                    'AnswerCount': 0,
+                    'CommentCount': 0,
+                    'FavoriteCount': 0,
+                    'ContentLicense': content_license
+                }
+        else:
+            if tag_string is None:
+                insertion = {
+                    'Id': self._get_new_id('post'),
+                    'PostTypeId': QUESTION_TYPE_ID,
+                    'CreationDate': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.') + datetime.now().strftime('%f')[:3],
+                    'Score': 0,
+                    'ViewCount': 0,
+                    'Body': body,
+                    'Title': title,
+                    'AnswerCount': 0,
+                    'CommentCount': 0,
+                    'FavoriteCount': 0,
+                    'ContentLicense': content_license
+                }
+            else:
+                insertion = {
+                    'Id': self._get_new_id('post'),
+                    'PostTypeId': QUESTION_TYPE_ID,
+                    'CreationDate': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.') + datetime.now().strftime('%f')[:3],
+                    'Score': 0,
+                    'ViewCount': 0,
+                    'Body': body,
+                    'Title': title,
+                    'Tags': tag_string,
+                    'AnswerCount': 0,
+                    'CommentCount': 0,
+                    'FavoriteCount': 0,
+                    'ContentLicense': content_license
+                }
+        write_res = self.posts.insert_one(insertion)
 
     def get_search_results(self, keywords):
         regx_keywords = []
         for keyword in keywords:
             regx_keywords.append(re.compile('.*' + keyword + '.*', flags=re.IGNORECASE | re.DOTALL))
-
         query = {'$and': [
             {'PostTypeId': QUESTION_TYPE_ID},
             {'$or': [
@@ -89,12 +164,35 @@ class DBManager:
 
     def increment_view_count(self, question_data):
         query = {'_id': question_data['_id']}
-        update = {'$inc': {'ViewCount': 1}} if 'ViewCount' in question_data else {'$set': {'ViewCount': 1}}
+        update = {'$inc': {'ViewCount': 1}}
         self.posts.update_one(query, update)
         return self.posts.find_one(query)
 
-    def add_answer(self, question_id, body, user_id):
-        pass
+    def add_answer(self, question_id, body, user_id, content_license='CC BY-SA 2.5'):
+        if user_id is not None:
+            insertion = {
+                'Id': self._get_new_id('post'),
+                'PostTypeId': ANSWER_TYPE_ID,
+                'ParentId': question_id,
+                'CreationDate': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.') + datetime.now().strftime('%f')[:3],
+                'Score': 0,
+                'Body': body,
+                'OwnerUserId': str(user_id),
+                'CommentCount': 0,
+                'ContentLicense': content_license
+            }
+        else:
+            insertion = {
+                'Id': self._get_new_id('post'),
+                'PostTypeId': ANSWER_TYPE_ID,
+                'ParentId': question_id,
+                'CreationDate': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.') + datetime.now().strftime('%f')[:3],
+                'Score': 0,
+                'Body': body,
+                'CommentCount': 0,
+                'ContentLicense': content_license
+            }
+        write_res = self.posts.insert_one(insertion)
 
     def get_answers(self, question_data):
         if 'AcceptedAnswerId' in question_data:
@@ -113,21 +211,35 @@ class DBManager:
             ]}
             return False, list(self.posts.find(query))
 
-    def check_vote_eligibility(self, post_id, user_id):
+    def check_vote_eligibility(self, post_data, user_id):
         query = {'$and': [
-            {'PostId': post_id},
+            {'_id': post_data['_id']},
             {'UserId': str(user_id)}
         ]}
         res = self.votes.find_one(query)
-        print(res)
+        return True if res is None else False
 
+    def add_vote(self, post_data, user_id):
+        if user_id is not None:
+            insertion = {
+                'Id': self._get_new_id('vote'),
+                'PostId': post_data['Id'],
+                'VoteTypeId': '2',
+                'UserId': str(user_id),
+                'CreationDate': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.') + datetime.now().strftime('%f')[:3]
+            }
+        else:
+            insertion = {
+                'Id': self._get_new_id('vote'),
+                'PostId': post_data['Id'],
+                'VoteTypeId': '2',
+                'CreationDate': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.') + datetime.now().strftime('%f')[:3]
+            }
+        write_res = self.votes.insert_one(insertion)
 
-    def add_vote(self, post_id, user_id):
-        # TODO create unique vote id
-        # TODO set creation date to current date
-        # vote type id should be 2
-        # TODO update score field in Posts
-        pass
+        query = {'_id': post_data['_id']}
+        update = {'$inc': {'Score': 1}}
+        self.posts.update_one(query, update)
 
     def close(self):
         self.client.close()
