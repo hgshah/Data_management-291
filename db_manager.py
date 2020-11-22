@@ -25,7 +25,7 @@ class DBManager:
 
     def _get_new_id(self, id_type):
         res = []
-        max_id_pipeline = {'$group': {'_id': None, 'max_id': {'$max': {'$toInt': '$Id'}}}}
+        max_id_pipeline = [{'$group': {'_id': None, 'max_id': {'$max': {'$toInt': '$Id'}}}}]
         if id_type == 'post':
             res = list(self.posts.aggregate(max_id_pipeline))
         elif id_type == 'vote':
