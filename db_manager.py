@@ -203,7 +203,7 @@ class DBManager:
                 {'PostTypeId': ANSWER_TYPE_ID},
                 {'ParentId': question_data['Id']}
             ]}
-            return True, [accepted_ans] + list(self.posts.find(query)) #TODO try with q that has no a
+            return True, [accepted_ans] + list(self.posts.find(query))
         else:
             query = {'$and': [
                 {'PostTypeId': ANSWER_TYPE_ID},
@@ -213,11 +213,10 @@ class DBManager:
 
     def check_vote_eligibility(self, post_data, user_id):
         query = {'$and': [
-            {'_id': post_data['_id']},
+            {'PostId': post_data['Id']},
             {'UserId': str(user_id)}
         ]}
-        res = self.votes.find_one(query)
-        return True if res is None else False
+        return True if self.votes.find_one(query) is None else False
 
     def add_vote(self, post_data, user_id):
         if user_id is not None:
