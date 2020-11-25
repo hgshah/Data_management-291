@@ -22,6 +22,7 @@ class DBManager:
         self.client = MongoClient(port=port)
         self.db = self.client[DB_NAME]
         self.tag_Id_index = 'tag_Id_index'
+        self.answer_post_index = 'answer_post_index'
         self.posttypeid_index , self.post_Id_index, self.post_owner_index = 'post_type_id_index', 'post_Id_index', 'post_owner_index'
         self.vote_Id_index, self.vote_userid_index, self.vote_postid_userid_index = 'vote_Id_index', 'vote_user_id_index', 'vote_postid_userid_index'
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
@@ -32,6 +33,11 @@ class DBManager:
         tag_indexes = self.tags.list_indexes()
         vote_indexes = self.votes.list_indexes()
         print('Creating indexes...')
+        if self.answer_post_index not in post_indexes:
+            self.posts.create_index(
+                [('PostTypeId', ASCENDING), ('ParentId', ASCENDING)],
+                name=self.post_owner_index
+            )
         if self.posttypeid_index not in post_indexes:
             self.posts.create_index(
                 [('PostTypeId', ASCENDING)],
