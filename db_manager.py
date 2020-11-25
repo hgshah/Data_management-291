@@ -125,12 +125,13 @@ class DBManager:
             return None
         tag_string = ''
         for tag in tags:
-            tag_string += '<' + tag + '>'
-            res = self.tags.find_one({'TagName': tag})
-            if res is None:
-                write_res = self.tags.insert_one({'Id': self._get_new_id('tag'), 'TagName': tag, 'Count': 1})
-            else:
-                self.tags.update_one({'_id': res['_id']}, {'$inc': {'Count': 1}})
+            if tag not in tag_string:
+                tag_string += '<' + tag + '>'
+                res = self.tags.find_one({'TagName': tag})
+                if res is None:
+                    write_res = self.tags.insert_one({'Id': self._get_new_id('tag'), 'TagName': tag, 'Count': 1})
+                else:
+                    self.tags.update_one({'_id': res['_id']}, {'$inc': {'Count': 1}})
         return tag_string
 
     def get_num_owned_posts_and_avg_score(self, user_id, post_type):
