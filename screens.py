@@ -225,6 +225,9 @@ class PostQuestion(BaseScreen):
                   '\t[2] No')
             selection = select_from_menu(valid_inputs)
         self.db_manager.add_question(title, body, tags, self.user_id)
+        clear_screen()
+        print('POST QUESTION')
+        input('\nQuestion successfully posted - please enter any key to return to the main menu:\n> ')
 
 
 class SearchForQuestions(BaseScreen):
