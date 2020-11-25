@@ -1,4 +1,4 @@
-from pymongo import MongoClient, ASCENDING, DESCENDING, collation
+from pymongo import MongoClient, collation, ASCENDING, DESCENDING, TEXT
 from datetime import datetime
 import re
 
@@ -21,8 +21,9 @@ class DBManager:
         """
         self.client = MongoClient(port=port)
         self.db = self.client[DB_NAME]
-        self.postId_index, self.tagId_index, self.voteId_index = 'post_Id_index', 'tag_Id_index', 'vote_Id_index'
-        self.post_owner_index = 'post_owner_index'
+        self.tagId_index = 'tag_Id_index'
+        self.postId_index, self.post_owner_index, self.post_search_index = 'post_Id_index', 'post_owner_index', 'post_search_index'
+        self.voteId_index, self.vote_userid_index, self.vote_postid_userid_index = 'vote_Id_index', 'vote_user_id_index', 'vote_postid_userid_index'
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
         self._try_creating_indexes()
 
@@ -37,8 +38,6 @@ class DBManager:
                 collation=collation.Collation('en_US', numericOrdering=True),
                 name=self.postId_index
             )
-        if self.post_owner_index not in post_indexes:
-            self.posts.create_index([('PostTypeId', ASCENDING), ('OwnerUserId', ASCENDING)], name=self.post_owner_index)
         if self.tagId_index not in tag_indexes:
             self.tags.create_index(
                 [('Id', ASCENDING)],
@@ -51,31 +50,45 @@ class DBManager:
                 collation=collation.Collation('en_US', numericOrdering=True),
                 name=self.voteId_index
             )
+        if self.post_search_index not in post_indexes:
+            self.posts.create_index(
+                [('PostTypeId', ASCENDING), ('Tags', TEXT), ('Title', TEXT), ('Body', TEXT)],
+                name=self.post_search_index
+            )
+        if self.post_owner_index not in post_indexes:
+            self.posts.create_index(
+                [('PostTypeId', ASCENDING), ('OwnerUserId', ASCENDING)],
+                name=self.post_owner_index
+            )
+        if self.vote_userid_index not in vote_indexes:
+            self.votes.create_index(
+                [('UserId', ASCENDING)],
+                name=self.vote_userid_index
+            )
+        if self.vote_postid_userid_index not in vote_indexes:
+            self.votes.create_index(
+                [('PostId', ASCENDING), ('UserId', ASCENDING)],
+                name=self.vote_postid_userid_index
+            )
 
     def _get_new_id(self, id_type):
-        # res = []
-        # max_id_pipeline = [{'$group': {'_id': None, 'max_id': {'$max': {'$toInt': '$Id'}}}}]
+        res = {}
         max_id_query = [('Id', DESCENDING)]
         if id_type == 'post':
             res = self.posts.find_one(
                 sort=max_id_query,
                 collation=collation.Collation('en_US', numericOrdering=True)
             )
-            # res = list(self.posts.aggregate(max_id_pipeline))
         elif id_type == 'vote':
             res = self.votes.find_one(
                 sort=max_id_query,
                 collation=collation.Collation('en_US', numericOrdering=True)
             )
-            # res = list(self.votes.aggregate(max_id_pipeline))
         elif id_type == 'tag':
             res = self.tags.find_one(
                 sort=max_id_query,
                 collation=collation.Collation('en_US', numericOrdering=True)
             )
-            # res = list(self.tags.aggregate(max_id_pipeline))
-        # max_id = 0 if len(res) != 1 else res[0]['max_id']
-        # return str(max_id + 1)
         return str(int(res['Id']) + 1)
 
     def _assemble_tag_string(self, tags):
@@ -198,8 +211,8 @@ class DBManager:
         query = {'$and': [
             {'PostTypeId': QUESTION_TYPE_ID},
             {'$or': [
-                {'Title': {'$in': regx_keywords}},
                 {'Tags': {'$in': regx_keywords}},
+                {'Title': {'$in': regx_keywords}},
                 {'Body': {'$in': regx_keywords}}
             ]}
         ]}
