@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 from datetime import datetime
 import re
 
@@ -21,7 +21,21 @@ class DBManager:
         """
         self.client = MongoClient(port=port)
         self.db = self.client[DB_NAME]
+        self.postIdIndex, self.tagIdIndex, self.voteIdIndex = 'post_Id_index', 'tag_Id_index', 'vote_Id_index'
         self.posts, self.tags, self.votes = self.db['Posts'], self.db['Tags'], self.db['Votes']
+        self._try_creating_indexes()
+
+    def _try_creating_indexes(self):
+        post_indexes = self.posts.list_indexes()
+        tag_indexes = self.tags.list_indexes()
+        vote_indexes = self.votes.list_indexes()
+        print('Creating indexes...')
+        if self.postIdIndex not in post_indexes:
+            self.posts.create_index([('Id', ASCENDING)], name=self.postIdIndex)
+        if self.tagIdIndex not in tag_indexes:
+            self.tags.create_index([('Id', ASCENDING)], name=self.tagIdIndex)
+        if self.voteIdIndex not in vote_indexes:
+            self.votes.create_index([('Id', ASCENDING)], name=self.voteIdIndex)
 
     def _get_new_id(self, id_type):
         res = []
