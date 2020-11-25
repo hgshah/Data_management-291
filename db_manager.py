@@ -200,15 +200,13 @@ class DBManager:
         write_res = self.posts.insert_one(insertion)
 
     def get_search_results(self, keywords):
-        regx_keywords = []
-        for keyword in keywords:
-            regx_keywords.append(re.compile('.*' + keyword + '.*', flags=re.IGNORECASE | re.DOTALL))
+        regx = re.compile(keywords.replace(' ', '|'), flags=re.IGNORECASE | re.DOTALL)
         query = {'$and': [
             {'PostTypeId': QUESTION_TYPE_ID},
             {'$or': [
-                {'Tags': {'$in': regx_keywords}},
-                {'Title': {'$in': regx_keywords}},
-                {'Body': {'$in': regx_keywords}}
+                {'Tags': regx},
+                {'Title': regx},
+                {'Body': regx}
             ]}
         ]}
         return list(self.posts.find(query))

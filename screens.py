@@ -253,9 +253,9 @@ class SearchForQuestions(BaseScreen):
         """
         TODO
         """
-        keywords = input('\nPlease enter a space separated list of one or more keywords:\n> ').split(' ')
+        keywords = input('\nPlease enter a space separated list of one or more keywords:\n> ')
         while len(keywords) == 0:
-            keywords = input('Invalid input - you must enter at least one keyword:\n> ').split(' ')
+            keywords = input('Invalid input - you must enter at least one keyword:\n> ')
         SearchResults(self.db_manager, self.user_id, keywords).run()
 
 
@@ -270,7 +270,7 @@ class SearchResults(BaseScreen):
         Initializes an instance of this class.
         :param db_manager: an instance of the db_manager.DBManager class
         :param user_id: user id specified by the user (if they did not specify one pass a None value)
-        :param keywords: a list containing the space-separated keywords to search as elements
+        :param keywords: a string containing the space-separated keywords to search as elements
         """
         self.valid_inputs = []
         self.user_id = user_id
