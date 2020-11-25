@@ -279,7 +279,6 @@ class SearchResults(BaseScreen):
 
     def _setup(self):
         print('SEARCH RESULTS')
-        print(len(self.search_res))
 
     def _display_search_results(self, current_ind):
         self.valid_inputs = []
@@ -303,6 +302,7 @@ class SearchResults(BaseScreen):
         """
         TODO
         """
+        print(len(self.search_res))
         current_ind = 0
         while True:
             num_printed = self._display_search_results(current_ind)
