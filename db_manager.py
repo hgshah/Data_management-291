@@ -260,9 +260,10 @@ class DBManager:
         :return: list of dicts corresponding to the documents of the questions that contain at least one of the
                  searched keywords in either their title, body, or tag fields
         """
-        query = {'$text': {
-            '$search': keywords
-        }}
+        query = {'$and': [
+            {'PostTypeId': QUESTION_TYPE_ID},
+            {'$text': {'$search': keywords}}
+        ]}
         return list(self.posts.find(query))
 
     def increment_view_count(self, question_data):
