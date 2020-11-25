@@ -284,6 +284,7 @@ class SearchResults(BaseScreen):
         self.valid_inputs = []
         clear_screen()
         self._setup()
+        print(len(self.search_res))
         for i in range(MAX_PER_PAGE):
             ind = i + current_ind
             if ind + 1 > len(self.search_res):
@@ -302,7 +303,6 @@ class SearchResults(BaseScreen):
         """
         TODO
         """
-        print(len(self.search_res))
         current_ind = 0
         while True:
             num_printed = self._display_search_results(current_ind)
