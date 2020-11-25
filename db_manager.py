@@ -131,11 +131,11 @@ class DBManager:
             return None
         tag_string = ''
         for tag in tags:
-            if tag not in tag_string:
-                tag_string += '<' + tag + '>'
-                res = self.tags.find_one({'TagName': tag})
+            if tag.lower() not in tag_string:
+                tag_string += '<' + tag.lower() + '>'
+                res = self.tags.find_one({'TagName': tag.lower()})
                 if res is None:
-                    write_res = self.tags.insert_one({'Id': self._get_new_id('tag'), 'TagName': tag, 'Count': 1})
+                    write_res = self.tags.insert_one({'Id': self._get_new_id('tag'), 'TagName': tag.lower(), 'Count': 1})
                 else:
                     self.tags.update_one({'_id': res['_id']}, {'$inc': {'Count': 1}})
         return tag_string
