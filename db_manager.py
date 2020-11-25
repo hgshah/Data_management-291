@@ -36,7 +36,7 @@ class DBManager:
         if self.answer_post_index not in post_indexes:
             self.posts.create_index(
                 [('PostTypeId', ASCENDING), ('ParentId', ASCENDING)],
-                name=self.post_owner_index
+                name=self.answer_post_index
             )
         if self.posttypeid_index not in post_indexes:
             self.posts.create_index(
