@@ -279,6 +279,7 @@ class SearchResults(BaseScreen):
 
     def _setup(self):
         print('SEARCH RESULTS')
+        print(len(self.search_res))
 
     def _display_search_results(self, current_ind):
         self.valid_inputs = []

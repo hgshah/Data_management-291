@@ -7,11 +7,6 @@ Harsh Shah : hgshah
 
 We did not collaborate with anyone else.
 
-Instructions for use (run the following commands in order):
-
-Note before running the program ensure that you have the following files in the current directory: Posts.json, Tags.json, Votes.json
-
-    - mkdir ~/mongodb_data_folder
-    - mongod --port 27012 --dbpath ~/mongodb_data_folder &
-    - python3 phase1.py 27012
-    - python3 phase2.py 27012
+Used the following as a reference:
+ - PyMongo Documentation (https://pymongo.readthedocs.io/en/stable/)
+ - MongoDB Documentation (https://docs.mongodb.com/manual/introduction/)
