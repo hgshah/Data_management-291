@@ -1,4 +1,4 @@
-from pymongo import MongoClient, ASCENDING
+from pymongo import MongoClient, ASCENDING, collation
 from datetime import datetime
 import re
 
@@ -32,25 +32,54 @@ class DBManager:
         vote_indexes = self.votes.list_indexes()
         print('Creating indexes...')
         if self.postId_index not in post_indexes:
-            self.posts.create_index([('Id', ASCENDING)], name=self.postId_index)
+            self.posts.create_index(
+                [('Id', ASCENDING)],
+                collation=collation.Collation('en_US', numericOrdering=True),
+                name=self.postId_index
+            )
         if self.post_owner_index not in post_indexes:
             self.posts.create_index([('PostTypeId', ASCENDING), ('OwnerUserId', ASCENDING)], name=self.post_owner_index)
         if self.tagId_index not in tag_indexes:
-            self.tags.create_index([('Id', ASCENDING)], name=self.tagId_index)
+            self.tags.create_index(
+                [('Id', ASCENDING)],
+                collation=collation.Collation('en_US', numericOrdering=True),
+                name=self.tagId_index
+            )
         if self.voteId_index not in vote_indexes:
-            self.votes.create_index([('Id', ASCENDING)], name=self.voteId_index)
+            self.votes.create_index(
+                [('Id', ASCENDING)],
+                collation=collation.Collation('en_US', numericOrdering=True),
+                name=self.voteId_index
+            )
 
     def _get_new_id(self, id_type):
-        res = []
-        max_id_pipeline = [{'$group': {'_id': None, 'max_id': {'$max': {'$toInt': '$Id'}}}}]
+        # res = []
+        # max_id_pipeline = [{'$group': {'_id': None, 'max_id': {'$max': {'$toInt': '$Id'}}}}]
+        max_id_query = {'Id': -1}
         if id_type == 'post':
-            res = list(self.posts.aggregate(max_id_pipeline))
+            res = self.posts.find_one(
+                sort=max_id_query,
+                limit=1,
+                collation=collation.Collation('en_US', numericOrdering=True)
+            )
+            # res = list(self.posts.aggregate(max_id_pipeline))
         elif id_type == 'vote':
-            res = list(self.votes.aggregate(max_id_pipeline))
+            res = self.votes.find_one(
+                sort=max_id_query,
+                limit=1,
+                collation=collation.Collation('en_US', numericOrdering=True)
+            )
+            # res = list(self.votes.aggregate(max_id_pipeline))
         elif id_type == 'tag':
-            res = list(self.tags.aggregate(max_id_pipeline))
-        max_id = 0 if len(res) != 1 else res[0]['max_id']
-        return str(max_id + 1)
+            res = self.tags.find_one(
+                sort=max_id_query,
+                limit=1,
+                ollation=collation.Collation('en_US', numericOrdering=True)
+            )
+            # res = list(self.tags.aggregate(max_id_pipeline))
+        # max_id = 0 if len(res) != 1 else res[0]['max_id']
+        # return str(max_id + 1)
+        return res['Id']
 
     def _assemble_tag_string(self, tags):
         if len(tags) == 0:
