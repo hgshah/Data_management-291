@@ -284,7 +284,6 @@ class SearchResults(BaseScreen):
         self.valid_inputs = []
         clear_screen()
         self._setup()
-        print(len(self.search_res))
         for i in range(MAX_PER_PAGE):
             ind = i + current_ind
             if ind + 1 > len(self.search_res):
