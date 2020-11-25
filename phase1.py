@@ -11,22 +11,13 @@ VOTES_FILE = 'Votes.json'
 
 
 def insert_into_posts(posts, post_data):
-    for i in post_data:
-        posts.insert_one(i)
-    # p_res = posts.insert_many(post_data)
-
+    p_res = posts.insert_many(post_data)
 
 def insert_into_tags(tags, tag_data):
-    for i in tag_data:
-        tags.insert_one(i)
-    # t_res = tags.insert_many(tag_data)
-
+    t_res = tags.insert_many(tag_data)
 
 def insert_into_votes(votes, vote_data):
-    for i in vote_data:
-        votes.insert_one(i)
-    # v_res = votes.insert_many(vote_data)
-
+    v_res = votes.insert_many(vote_data)
 
 class BuildDocStore:
     """
@@ -66,15 +57,9 @@ class BuildDocStore:
             t_data = json.load(t)
         with open(VOTES_FILE) as v:
             v_data = json.load(v)
-        p = threading.Thread(target=insert_into_posts, args=(self.posts, p_data['posts']['row'],))
-        p.start()
-        t = threading.Thread(target=insert_into_tags, args=(self.tags, t_data['tags']['row'],))
-        t.start()
-        v = threading.Thread(target=insert_into_votes, args=(self.votes, v_data['votes']['row'],))
-        v.start()
-        p.join()
-        t.join()
-        v.join()
+        p_res = self.posts.insert_many(p_data['posts']['row'])
+        t_res = self.tags.insert_many(t_data['tags']['row'])
+        v_res = self.votes.insert_many(v_data['votes']['row'])
 
     def _close(self):
         self.client.close()
@@ -84,7 +69,7 @@ if __name__ == '__main__':
     assert (len(sys.argv) == 2), 'please enter the correct number of arguments - this program should be run using ' \
                                  '"python3 phase1.py PORT_NUMBER"'
     try:
-        port_no = int(sys.argv[1])
-        BuildDocStore(port_no)
+        p = int(sys.argv[1])
+        BuildDocStore(p)
     except ValueError:
         assert False, 'ValueError - please ensure that the port number specified is an integer'
