@@ -23,7 +23,8 @@ class DBManager:
         self.client = MongoClient(port=port)
         self.db = self.client[DB_NAME]
         self.tag_Id_index = 'tag_Id_index'
-        self.answer_post_index = 'answer_post_index'
+        self.question_search_index = 'question_search_index'
+        self.find_answers_index = 'find_answers_index'
         self.posttypeid_index = 'post_type_id_index'
         self.post_Id_index = 'post_Id_index'
         self.post_owner_index = 'post_owner_index'
@@ -42,10 +43,16 @@ class DBManager:
         tag_indexes = self.tags.list_indexes()
         vote_indexes = self.votes.list_indexes()
         print('Creating indexes...')
-        if self.answer_post_index not in post_indexes:
+        if self.question_search_index not in post_indexes:
+            self.posts.create_index(
+                [('Tags', TEXT), ('Title', TEXT), ('Body', TEXT)],
+                collation=collation.Collation('en_US', strength=collation.CollationStrength.SECONDARY),
+                name=self.question_search_index
+            )
+        if self.find_answers_index not in post_indexes:
             self.posts.create_index(
                 [('PostTypeId', ASCENDING), ('ParentId', ASCENDING)],
-                name=self.answer_post_index
+                name=self.find_answers_index
             )
         if self.posttypeid_index not in post_indexes:
             self.posts.create_index(
@@ -250,19 +257,13 @@ class DBManager:
         Gets the questions from the Posts collection that contain at least one of the searched keywords in either their
         title, body, or tag fields. Our implementation finds case-insensitive and partial matches. Uses regex to find
         the matching questions.
-        :param keywords: space seperated string of keywords
+        :param keywords: space separated string of keywords
         :return: list of dicts corresponding to the documents of the questions that contain at least one of the
                  searched keywords in either their title, body, or tag fields
         """
-        regx = re.compile(keywords.replace(' ', '|'), flags=re.IGNORECASE | re.DOTALL)
-        query = {'$and': [
-            {'PostTypeId': QUESTION_TYPE_ID},
-            {'$or': [
-                {'Tags': regx},
-                {'Title': regx},
-                {'Body': regx}
-            ]}
-        ]}
+        query = {'$text': {
+            '$search': keywords
+        }}
         return list(self.posts.find(query))
 
     def increment_view_count(self, question_data):
