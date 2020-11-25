@@ -1,5 +1,6 @@
 import json
 import sys
+import threading
 from os import path
 from pymongo import MongoClient, TEXT, collation
 
@@ -7,6 +8,18 @@ DB_NAME = '291db'
 POSTS_FILE = 'Posts.json'
 TAGS_FILE = 'Tags.json'
 VOTES_FILE = 'Votes.json'
+
+
+def insert_into_posts(posts, post_data):
+    p_res = posts.insert_many(post_data)
+
+
+def insert_into_tags(tags, tag_data):
+    t_res = tags.insert_many(tag_data)
+
+
+def insert_into_votes(votes, vote_data):
+    v_res = votes.insert_many(vote_data)
 
 
 class BuildDocStore:
@@ -47,9 +60,15 @@ class BuildDocStore:
             t_data = json.load(t)
         with open(VOTES_FILE) as v:
             v_data = json.load(v)
-        p_res = self.posts.insert_many(p_data['posts']['row'], ordered=False)
-        t_res = self.tags.insert_many(t_data['tags']['row'], ordered=False)
-        v_res = self.votes.insert_many(v_data['votes']['row'], ordered=False)
+        p = threading.Thread(target=insert_into_posts, args=(self.posts, p_data['posts']['row'],))
+        p.start()
+        t = threading.Thread(target=insert_into_tags, args=(self.tags, t_data['tags']['row'],))
+        t.start()
+        v = threading.Thread(target=insert_into_votes, args=(self.votes, v_data['votes']['row'],))
+        v.start()
+        p.join()
+        t.join()
+        v.join()
 
     def _close(self):
         self.client.close()
@@ -59,7 +78,7 @@ if __name__ == '__main__':
     assert (len(sys.argv) == 2), 'please enter the correct number of arguments - this program should be run using ' \
                                  '"python3 phase1.py PORT_NUMBER"'
     try:
-        p = int(sys.argv[1])
-        BuildDocStore(p)
+        port_no = int(sys.argv[1])
+        BuildDocStore(port_no)
     except ValueError:
         assert False, 'ValueError - please ensure that the port number specified is an integer'
