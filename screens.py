@@ -49,6 +49,14 @@ class BaseScreen:
         return NotImplementedError
 
     def _try_adding_vote(self, post_data, user_id):
+        """
+        Tries to add a vote of type 2 on the specified post from the the specified user. Ensures that the user is
+        eligible before adding the vote - if the user is not eligible the vote is not added and the user is notified
+        why they were ineligible (a user who has specified a user id can only vote once per post whereas a user who
+        has not specified a user id can vote as many times as they would like).
+        :param post_data: dict corresponding to the Post document to add a vote to
+        :param user_id: int representing user id of user or None if they did not specify one
+        """
         clear_screen()
         print('ADD VOTE')
         if user_id is not None:
@@ -89,7 +97,8 @@ class StartScreen(BaseScreen):
     def run(self):
         """
         Gives the user the option to specify a user id and if they decide to ensures that the specified user id is
-        numeric.
+        numeric and gets the required data for the user report (num owned questions, avg score of owned questions, num
+        owned answers, avg score of owned answers, num votes registered by user).
         :return: tuple consisting of (int, list) where the int corresponds to the specified user id (or a None value if
                  they did not want to provide one) and the list corresponds to [number of owned questions, avg score of
                  owned questions, number of owned answers, avg score of owned answers, number of votes registered] for
@@ -164,11 +173,17 @@ class MainMenu(BaseScreen):
               '\t[e] End program')
 
     def _refresh(self):
+        """
+        Clears the shell screen and gets the an updated version of the required data for the user report (num owned
+        questions, avg score of owned questions, num owned answers, avg score of owned answers, num votes registered by
+        user) if a user id was specified.
+        """
         clear_screen()
-        num_owned_qs, avg_q_score = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 1)
-        num_owned_as, avg_a_score = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 2)
-        num_votes = self.db_manager.get_num_votes(self.user_id)
-        self.report_info = [num_owned_qs, avg_q_score, num_owned_as, avg_a_score, num_votes]
+        if self.user_id is not None:
+            num_owned_qs, avg_q_score = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 1)
+            num_owned_as, avg_a_score = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 2)
+            num_votes = self.db_manager.get_num_votes(self.user_id)
+            self.report_info = [num_owned_qs, avg_q_score, num_owned_as, avg_a_score, num_votes]
         self._setup()
 
     def run(self):
@@ -207,7 +222,8 @@ class PostQuestion(BaseScreen):
 
     def run(self):
         """
-        TODO
+        Allows the user to post a question by providing a title, body, and zero or more tags. Prints a confirmation
+        once completed.
         """
         valid_inputs = ['1', '2']
         tags = []
@@ -232,9 +248,8 @@ class PostQuestion(BaseScreen):
 
 class SearchForQuestions(BaseScreen):
     """
-    Class representing the search for questions screen. Allows the user to provide one or more keywords and the system
-    will retrieve all questions that contain at least one keyword in either title, body, or tag fields
-    (case-insensitive).
+    Class representing the search for questions screen. Allows the user to provide one or more space separated keywords
+    that they would like to search.
     """
 
     def __init__(self, db_manager, user_id):
@@ -251,7 +266,8 @@ class SearchForQuestions(BaseScreen):
 
     def run(self):
         """
-        TODO
+        Allows the user to provide one or more space separated keywords which are passed to the SearchResults screen
+        which retrieves the results.
         """
         keywords = input('\nPlease enter a space separated list of one or more keywords:\n> ')
         while len(keywords) == 0:
@@ -261,8 +277,8 @@ class SearchForQuestions(BaseScreen):
 
 class SearchResults(BaseScreen):
     """
-    Class representing the search results screen. Displays all questions that contain at least one of the searched
-    keywords in either title, body, or tag fields (case-insensitive).
+    Class representing the search results screen. Retrieves and displays (up to 10 at a time) all questions that contain
+    at least one of the searched keywords in either title, body, or tag fields (case-insensitive).
     """
 
     def __init__(self, db_manager, user_id, keywords):
@@ -281,6 +297,12 @@ class SearchResults(BaseScreen):
         print('SEARCH RESULTS')
 
     def _display_search_results(self, current_ind):
+        """
+        Displays up to 10 search results at a time. Displays the title, creation date, score, and answer count of each
+        retrieved question.
+        :param current_ind: integer representing the number of search results that have already been displayed
+        :return: None if all search results have been printed or the number of search results that have been printed
+        """
         self.valid_inputs = []
         clear_screen()
         self._setup()
@@ -300,7 +322,8 @@ class SearchResults(BaseScreen):
 
     def run(self):
         """
-        TODO
+        Displays the search results (up to 10 at a time) and gives the user the option to select a question to perform
+        an action on, see more search results (if possible), or return to the main menu.
         """
         current_ind = 0
         while True:
@@ -329,7 +352,9 @@ class SearchResults(BaseScreen):
 
 class QuestionAction(BaseScreen):
     """
-    TODO
+    Class representing the question action screen. Displays all the fields of the selected question an allows the user
+    to either answer the selected question, list existing answers to the selected question, add a vote to the selected
+    question, or return to the main menu.
     """
 
     def __init__(self, db_manager, user_id, selected_question_data):
@@ -337,13 +362,17 @@ class QuestionAction(BaseScreen):
         Initializes an instance of this class.
         :param db_manager: an instance of the db_manager.DBManager class
         :param user_id: user id specified by the user (if they did not specify one pass a None value)
-        :param selected_question_data: a dict containing the data of the selected post
+        :param selected_question_data: a dict containing the data of the selected question post
         """
         self.user_id = user_id
         self.question_data = selected_question_data
         BaseScreen.__init__(self, db_manager=db_manager)
 
     def _setup(self):
+        """
+        Increments the view count of the selected question by one and then displays the possible question actions that
+        the user can take.
+        """
         self.question_data = self.db_manager.increment_view_count(self.question_data)
         print('QUESTION ACTION\n')
         for key, value in self.question_data.items():
@@ -362,6 +391,10 @@ class QuestionAction(BaseScreen):
         )
 
     def _answer_question(self):
+        """
+        Allows the user to provide an answer text and then adds a new answer post to the database accordingly. Prints
+        a confirmation upon completion allowing the user to return to the main menu.
+        """
         clear_screen()
         print('ANSWER QUESTION')
         body = input('\nPlease enter the text corresponding to your answer:\n> ')
@@ -371,6 +404,18 @@ class QuestionAction(BaseScreen):
         input('\nAnswer successfully posted - please enter any key to return to the main menu:\n> ')
 
     def _display_answers(self, current_ind, answers, has_accepted):
+        """
+        Displays the up to 10 answers (at a time) to the selected question. If the question has an accepted answer it
+        is displayed first and is marked with a star. Shows up to the first 80 characters of the body text, the creation
+        date, and the score of each answer.
+        :param current_ind: integer representing the number of search results that have already been displayed
+        :param answers: a list containing the data of each answer to the selected question
+        :param has_accepted: whether the first index (current_ind + i) is an accepted answer
+        :return: tuple consisting of int, list where the int is either None if all search results have been printed or
+                 the number of search results that have been printed and the list is the valid inputs for the answers
+                 that have just been printed (i.e. if answers 11-20 have just been printed the list would be ['11',
+                 '12', '13', '14', '15', '16', '17', '18', '19', '20']
+        """
         valid_inputs = []
         clear_screen()
         print('EXISTING ANSWERS')
@@ -393,6 +438,11 @@ class QuestionAction(BaseScreen):
         return MAX_PER_PAGE, valid_inputs
 
     def _list_answers(self):
+        """
+        Displays the answers to the selected question (up to 10 at a time) and gives the user the option to select an
+        answer to perform an action on, see more answers (if possible), or return to the main menu. If the selected
+        question has an accepted answer it will be displayed first and will be marked with a star.
+        """
         has_accepted, answers = self.db_manager.get_answers(self.question_data)
         current_ind = 0
         while True:
@@ -420,6 +470,10 @@ class QuestionAction(BaseScreen):
             AnswerAction(self.db_manager, self.user_id, answers[int(selection) - 1]).run()
 
     def run(self):
+        """
+        Allows the user to either answer the selected question, list existing answers to the selected question, add a
+        vote to the selected question, or return to the main menu.
+        """
         valid_inputs = ['1', '2', '3', 'r']
         selection = select_from_menu(valid_inputs)
         if selection == '1':
@@ -431,12 +485,26 @@ class QuestionAction(BaseScreen):
 
 
 class AnswerAction(BaseScreen):
+    """
+    Class representing the answer action screen. Displays all the fields of the selected answer and allows the user to
+    either add a vote to the selected answer or return to the main menu.
+    """
+
     def __init__(self, db_manager, user_id, selected_answer_data):
+        """
+        Initializes an instance of this class.
+        :param db_manager: an instance of the db_manager.DBManager class
+        :param user_id: user id specified by the user (if they did not specify one pass a None value)
+        :param selected_answer_data: a dict containing the data of the selected answer post
+        """
         self.user_id = user_id
         self.answer_data = selected_answer_data
         BaseScreen.__init__(self, db_manager=db_manager)
 
     def _setup(self):
+        """
+        Displays all the fields of the selected answer and the answer actions that the user is able to take.
+        """
         print('ANSWER ACTION\n')
         for key, value in self.answer_data.items():
             print('{} : {}'.format(key, value))
@@ -445,6 +513,9 @@ class AnswerAction(BaseScreen):
               '\t[r] Return to the main menu')
 
     def run(self):
+        """
+        Allows the user to either add a vote to the selected answer or return to the main menu.
+        """
         valid_inputs = ['1', 'r']
         selection = select_from_menu(valid_inputs)
         if selection != 'r':
