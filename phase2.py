@@ -21,7 +21,7 @@ class Driver:
         """
         Runs the start screen where the user can optionally specify a user id then runs the main menu screen from which
         all the functionality of the program can be accessed. Closes the MongoDB client represented by the DBManager
-        instance upon exiting and clears the screen of the terminal.
+        instance and clears the shell screen upon exiting.
         """
         user_id, report_info = StartScreen(self.db_manager).run()
         MainMenu(self.db_manager, user_id, report_info).run()
