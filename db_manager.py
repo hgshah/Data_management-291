@@ -1,4 +1,4 @@
-from pymongo import MongoClient, ASCENDING, collation
+from pymongo import MongoClient, ASCENDING, DESCENDING, collation
 from datetime import datetime
 import re
 
@@ -55,25 +55,22 @@ class DBManager:
     def _get_new_id(self, id_type):
         # res = []
         # max_id_pipeline = [{'$group': {'_id': None, 'max_id': {'$max': {'$toInt': '$Id'}}}}]
-        max_id_query = {'Id': -1}
+        max_id_query = [('Id', DESCENDING)]
         if id_type == 'post':
             res = self.posts.find_one(
                 sort=max_id_query,
-                limit=1,
                 collation=collation.Collation('en_US', numericOrdering=True)
             )
             # res = list(self.posts.aggregate(max_id_pipeline))
         elif id_type == 'vote':
             res = self.votes.find_one(
                 sort=max_id_query,
-                limit=1,
                 collation=collation.Collation('en_US', numericOrdering=True)
             )
             # res = list(self.votes.aggregate(max_id_pipeline))
         elif id_type == 'tag':
             res = self.tags.find_one(
                 sort=max_id_query,
-                limit=1,
                 collation=collation.Collation('en_US', numericOrdering=True)
             )
             # res = list(self.tags.aggregate(max_id_pipeline))
