@@ -1,23 +1,13 @@
 import json
 import sys
-import threading
 from os import path
-from pymongo import MongoClient, TEXT, collation
+from pymongo import MongoClient
 
 DB_NAME = '291db'
 POSTS_FILE = 'Posts.json'
 TAGS_FILE = 'Tags.json'
 VOTES_FILE = 'Votes.json'
 
-
-def insert_into_posts(posts, post_data):
-    p_res = posts.insert_many(post_data)
-
-def insert_into_tags(tags, tag_data):
-    t_res = tags.insert_many(tag_data)
-
-def insert_into_votes(votes, vote_data):
-    v_res = votes.insert_many(vote_data)
 
 class BuildDocStore:
     """
