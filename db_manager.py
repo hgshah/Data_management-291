@@ -74,7 +74,7 @@ class DBManager:
             res = self.tags.find_one(
                 sort=max_id_query,
                 limit=1,
-                ollation=collation.Collation('en_US', numericOrdering=True)
+                collation=collation.Collation('en_US', numericOrdering=True)
             )
             # res = list(self.tags.aggregate(max_id_pipeline))
         # max_id = 0 if len(res) != 1 else res[0]['max_id']
