@@ -11,15 +11,21 @@ VOTES_FILE = 'Votes.json'
 
 
 def insert_into_posts(posts, post_data):
-    p_res = posts.insert_many(post_data)
+    for i in post_data:
+        posts.insert_one(i)
+    # p_res = posts.insert_many(post_data)
 
 
 def insert_into_tags(tags, tag_data):
-    t_res = tags.insert_many(tag_data)
+    for i in tag_data:
+        tags.insert_one(i)
+    # t_res = tags.insert_many(tag_data)
 
 
 def insert_into_votes(votes, vote_data):
-    v_res = votes.insert_many(vote_data)
+    for i in vote_data:
+        votes.insert_one(i)
+    # v_res = votes.insert_many(vote_data)
 
 
 class BuildDocStore:
