@@ -76,7 +76,7 @@ class DBManager:
             # res = list(self.tags.aggregate(max_id_pipeline))
         # max_id = 0 if len(res) != 1 else res[0]['max_id']
         # return str(max_id + 1)
-        return res['Id']
+        return str(int(res['Id']) + 1)
 
     def _assemble_tag_string(self, tags):
         if len(tags) == 0:
