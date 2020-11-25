@@ -46,7 +46,6 @@ class DBManager:
         if self.question_search_index not in post_indexes:
             self.posts.create_index(
                 [('Tags', TEXT), ('Title', TEXT), ('Body', TEXT)],
-                collation=collation.Collation('en_US', strength=collation.CollationStrength.SECONDARY),
                 name=self.question_search_index
             )
         if self.find_answers_index not in post_indexes:
