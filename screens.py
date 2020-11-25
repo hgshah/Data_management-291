@@ -165,9 +165,10 @@ class MainMenu(BaseScreen):
 
     def _refresh(self):
         clear_screen()
-        self.report_info[0], self.report_info[1] = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 1)
-        self.report_info[2], self.report_info[3] = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 2)
-        self.report_info[4] = self.db_manager.get_num_votes(self.user_id)
+        num_owned_qs, avg_q_score = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 1)
+        num_owned_as, avg_a_score = self.db_manager.get_num_owned_posts_and_avg_score(self.user_id, 2)
+        num_votes = self.db_manager.get_num_votes(self.user_id)
+        self.report_info = [num_owned_qs, avg_q_score, num_owned_as, avg_a_score, num_votes]
         self._setup()
 
     def run(self):
