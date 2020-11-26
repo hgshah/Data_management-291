@@ -46,6 +46,7 @@ class DBManager:
         if self.question_search_index not in post_indexes:
             self.posts.create_index(
                 [('Tags', TEXT), ('Title', TEXT), ('Body', TEXT)],
+                default_language='none',
                 name=self.question_search_index
             )
         if self.find_answers_index not in post_indexes:
@@ -131,11 +132,11 @@ class DBManager:
             return None
         tag_string = ''
         for tag in tags:
-            if tag.lower() not in tag_string:
-                tag_string += '<' + tag.lower() + '>'
-                res = self.tags.find_one({'TagName': tag.lower()})
+            if tag not in tag_string:
+                tag_string += '<' + tag + '>'
+                res = self.tags.find_one({'TagName': tag})
                 if res is None:
-                    write_res = self.tags.insert_one({'Id': self._get_new_id('tag'), 'TagName': tag.lower(), 'Count': 1})
+                    write_res = self.tags.insert_one({'Id': self._get_new_id('tag'), 'TagName': tag, 'Count': 1})
                 else:
                     self.tags.update_one({'_id': res['_id']}, {'$inc': {'Count': 1}})
         return tag_string
@@ -260,10 +261,7 @@ class DBManager:
         :return: list of dicts corresponding to the documents of the questions that contain at least one of the
                  searched keywords in either their title, body, or tag fields
         """
-        query = {'$and': [
-            {'PostTypeId': QUESTION_TYPE_ID},
-            {'$text': {'$search': keywords}}
-        ]}
+        query = {'$and': [{'PostTypeId': QUESTION_TYPE_ID}, {'$text': {'$search': keywords}}]}
         return list(self.posts.find(query))
 
     def increment_view_count(self, question_data):
