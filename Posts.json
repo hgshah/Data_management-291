@@ -1,0 +1,22 @@
+{
+  "posts": {
+    "row": [
+      {
+        "Id": "1",
+        "PostTypeId": "1",
+        "CreationDate": "2014-08-17T19:22:37.890",
+        "Score": 0,
+        "ViewCount": 12,
+        "Body": "What is the best programming language?",
+        "OwnerUserId": "1",
+        "LastEditDate": "2015-09-08T15:12:04.097",
+        "LastActivityDate": "2018-09-21T12:16:56.790",
+        "Title": "What is the difference between Intel and PPC?",
+        "Tags": "<C>",
+        "CommentCount": 0,
+        "FavoriteCount": 2,
+        "ContentLicense": "CC BY-SA 2.5"
+      }
+    ]
+  }
+}
