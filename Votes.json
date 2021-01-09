@@ -1,0 +1,12 @@
+{
+  "votes": {
+    "row": [
+      {
+        "Id": "1",
+        "PostId": "1",
+        "VoteTypeId": "2",
+        "CreationDate": "2018-08-17T00:00:00.000"
+      }
+    ]
+  }
+}
